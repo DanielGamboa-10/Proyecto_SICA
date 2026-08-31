@@ -41,6 +41,10 @@ public final class UsuarioBloqueadoEvent implements DomainEvent {
         return ocurridoEn;
     }
 
+    public String getUsuarioId() {
+        return usuarioId;
+    }
+
     public String getUsername() {
         return username;
     }
