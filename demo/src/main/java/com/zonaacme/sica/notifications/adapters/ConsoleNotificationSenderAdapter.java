@@ -33,26 +33,26 @@ public class ConsoleNotificationSenderAdapter implements NotificationSenderPort 
         // Formateo visual y despacho según el canal tecnológico asignado
         switch (notificacion.getCanal()) {
             case ALERTA_MONITOR_GUARDIA:
-                System.out.println(String.format("🚨 [MONITOR SEGURIDAD] (%s) %s -> %s: %s",
+                System.out.println(String.format("[MONITOR SEGURIDAD] (%s) %s -> %s: %s",
                         notificacion.getTipo().getNivel(),
                         notificacion.getAsunto(),
                         notificacion.getDestinatarioId(),
                         notificacion.getCuerpo()));
                 break;
             case EMAIL:
-                System.out.println(String.format("✉️ [EMAIL] Para: %s | Asunto: %s | Cuerpo: %s",
+                System.out.println(String.format("[EMAIL] Para: %s | Asunto: %s | Cuerpo: %s",
                         notificacion.getDestinatarioId(),
                         notificacion.getAsunto(),
                         notificacion.getCuerpo()));
                 break;
             case SMS:
-                System.out.println(String.format("📱 [SMS] Para: %s | Mensaje: %s",
+                System.out.println(String.format("[SMS] Para: %s | Mensaje: %s",
                         notificacion.getDestinatarioId(),
                         notificacion.getCuerpo()));
                 break;
             case CONSOLA_INTERNA:
             default:
-                System.out.println(String.format("🔔 [NOTIFICACIÓN INTERNA] Para: %s | %s - %s",
+                System.out.println(String.format("[NOTIFICACIÓN INTERNA] Para: %s | %s - %s",
                         notificacion.getDestinatarioId(),
                         notificacion.getAsunto(),
                         notificacion.getCuerpo()));

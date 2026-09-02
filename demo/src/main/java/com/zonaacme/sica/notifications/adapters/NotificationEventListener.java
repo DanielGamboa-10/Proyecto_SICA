@@ -80,7 +80,7 @@ public class NotificationEventListener implements DomainEventListener<DomainEven
         Notificacion alerta = Notificacion.crear(
                 "CENTRAL_SEGURIDAD",
                 TipoNotificacion.ALERTA_SEGURIDAD_ACCESO_DENEGADO,
-                "🚨 ALERTA: Acceso Denegado en " + event.getPuntoControlId(),
+                "ALERTA: Acceso Denegado en " + event.getPuntoControlId(),
                 String.format("Acceso denegado para persona '%s' en punto '%s' (Zona: %s). Causa: %s. Detalle: %s",
                         event.getPersonaId(), event.getPuntoControlId(), event.getZonaId(),
                         event.getMotivoDenegacion(), event.getDetalle()),
@@ -93,7 +93,7 @@ public class NotificationEventListener implements DomainEventListener<DomainEven
         Notificacion alerta = Notificacion.crear(
                 "ADMIN_SEGURIDAD",
                 TipoNotificacion.ALERTA_USUARIO_BLOQUEADO,
-                "🚨 ALERTA CRÍTICA: Usuario Bloqueado por Seguridad",
+                "ALERTA CRÍTICA: Usuario Bloqueado por Seguridad",
                 String.format("El usuario '%s' (ID: %s) ha sido bloqueado temporalmente hasta %s por exceso de intentos de inicio de sesión.",
                         event.getUsername(), event.getUsuarioId(), event.getBloqueadoHasta()),
                 CanalNotificacion.ALERTA_MONITOR_GUARDIA
