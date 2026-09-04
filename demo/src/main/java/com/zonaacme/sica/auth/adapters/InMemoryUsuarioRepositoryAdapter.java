@@ -34,7 +34,9 @@ public class InMemoryUsuarioRepositoryAdapter implements UsuarioRepositoryPort {
 
     private void inicializarUsuariosSemilla() {
         crearUsuarioSemilla("admin", "Admin123*", "Administrador General", "admin@zonaacme.com", Rol.ADMINISTRADOR);
-        crearUsuarioSemilla("guardia1", "Guardia123*", "Carlos Vigilante", "guardia1@zonaacme.com", Rol.GUARDIA_SEGURIDAD);
+        crearUsuarioSemilla("guardia1", "Guardia123*", "Carlos Vigilante (Guarda)", "guardia1@zonaacme.com", Rol.GUARDIA_SEGURIDAD);
+        crearUsuarioSemilla("funcionario1", "Func123*", "Dr. Mauricio Restrepo (Funcionario)", "funcionario1@zonaacme.com", Rol.ANFITRION_EMPLEADO);
+        crearUsuarioSemilla("super1", "Super123*", "Capitán Fernando Rojas (Supervisor)", "super1@zonaacme.com", Rol.AUDITOR);
         crearUsuarioSemilla("recepcion1", "Recepcion123*", "Ana Recepción", "recepcion1@zonaacme.com", Rol.RECEPCIONISTA);
         crearUsuarioSemilla("anfitrion1", "Anfitrion123*", "Roberto Empleado", "anfitrion1@zonaacme.com", Rol.ANFITRION_EMPLEADO);
         crearUsuarioSemilla("auditor1", "Auditor123*", "Laura Auditora", "auditor1@zonaacme.com", Rol.AUDITOR);
