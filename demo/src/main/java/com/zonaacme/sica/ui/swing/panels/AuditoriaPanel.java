@@ -65,7 +65,7 @@ public class AuditoriaPanel extends JPanel {
             cargarAuditoria();
         });
 
-        toolbar.add(new JLabel("Filtrar: "));
+        toolbar.add(ThemeConstants.createLabel("Filtrar: "));
         toolbar.add(txtBuscar);
         toolbar.add(btnBuscar);
         toolbar.add(btnRefrescar);

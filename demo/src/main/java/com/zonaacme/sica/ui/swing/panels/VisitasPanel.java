@@ -102,7 +102,7 @@ public class VisitasPanel extends JPanel {
         JButton btnCheckOut = ThemeConstants.createButton("Check-Out", ThemeConstants.BG_CARD_HOVER, ThemeConstants.TEXT_PRIMARY);
         btnCheckOut.addActionListener(e -> accionarCheckOut());
 
-        toolbar.add(new JLabel("Filtrar: "));
+        toolbar.add(ThemeConstants.createLabel("Filtrar: "));
         toolbar.add(comboFiltroEstado);
         toolbar.add(btnNuevaVisita);
         toolbar.add(btnAprobar);
@@ -191,24 +191,20 @@ public class VisitasPanel extends JPanel {
             anfitrionModel.addElement(new PersonaComboItem(p.getId(), p.getNombreCompleto() + " (" + p.getTipoPersona() + ")"));
         }
 
-        JComboBox<PersonaComboItem> comboVisitante = new JComboBox<>(visitanteModel);
-        JComboBox<PersonaComboItem> comboAnfitrion = new JComboBox<>(anfitrionModel);
-        JTextField txtMotivo = ThemeConstants.createTextField();
-        txtMotivo.setText("Reunión de consultoría técnica");
-        JTextField txtHoras = ThemeConstants.createTextField();
-        txtHoras.setText("4");
-        JTextField txtPlaca = ThemeConstants.createTextField();
-        txtPlaca.setText("ABC-123");
+        comboVisitante.setBackground(ThemeConstants.BG_INPUT);
+        comboVisitante.setForeground(ThemeConstants.TEXT_PRIMARY);
+        comboAnfitrion.setBackground(ThemeConstants.BG_INPUT);
+        comboAnfitrion.setForeground(ThemeConstants.TEXT_PRIMARY);
 
-        content.add(new JLabel("Visitante:"));
+        content.add(ThemeConstants.createLabel("Visitante:"));
         content.add(comboVisitante);
-        content.add(new JLabel("Anfitrión:"));
+        content.add(ThemeConstants.createLabel("Anfitrión:"));
         content.add(comboAnfitrion);
-        content.add(new JLabel("Motivo de Visita:"));
+        content.add(ThemeConstants.createLabel("Motivo de Visita:"));
         content.add(txtMotivo);
-        content.add(new JLabel("Duración (Horas):"));
+        content.add(ThemeConstants.createLabel("Duración (Horas):"));
         content.add(txtHoras);
-        content.add(new JLabel("Placa Vehículo (Opcional):"));
+        content.add(ThemeConstants.createLabel("Placa Vehículo (Opcional):"));
         content.add(txtPlaca);
 
         JButton btnGuardar = ThemeConstants.createButton("Crear Solicitud", ThemeConstants.ACCENT_PRIMARY, Color.WHITE);

@@ -19,8 +19,8 @@ public final class ThemeConstants {
     public static final Color BG_CARD = new Color(24, 32, 54);            // Slate 800 Elevated
     public static final Color BG_CARD_HOVER = new Color(36, 48, 77);      // Slate 700 Hover
     public static final Color BG_INPUT = new Color(13, 19, 33);           // Dark Input
-    public static final Color BG_TABLE_HEADER = new Color(30, 41, 67);    // Header Slate
-    public static final Color BG_TABLE_ROW_ALT = new Color(18, 25, 43);
+    public static final Color BG_TABLE_HEADER = new Color(26, 36, 60);    // Header Slate
+    public static final Color BG_TABLE_ROW_ALT = new Color(16, 22, 38);   // Alternating row
 
     // Colores de Acento Vibrantes y Gradientes
     public static final Color ACCENT_PRIMARY = new Color(99, 102, 241);   // Indigo Neon
@@ -32,19 +32,26 @@ public final class ThemeConstants {
 
     // Textos
     public static final Color TEXT_PRIMARY = new Color(248, 250, 252);    // Pure White/Slate 50
-    public static final Color TEXT_SECONDARY = new Color(156, 163, 175);  // Gray 400
-    public static final Color TEXT_MUTED = new Color(107, 114, 128);      // Gray 500
-    public static final Color BORDER_COLOR = new Color(45, 58, 88);       // Border Glow
-    public static final Color BORDER_HIGHLIGHT = new Color(99, 102, 241, 90);
+    public static final Color TEXT_SECONDARY = new Color(203, 213, 225);  // Slate 300 (Alto Contraste)
+    public static final Color TEXT_MUTED = new Color(148, 163, 184);      // Slate 400
+    public static final Color BORDER_COLOR = new Color(51, 65, 85);       // Border Glow
+    public static final Color BORDER_HIGHLIGHT = new Color(99, 102, 241, 140);
 
     // Tipografías
     public static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, 24);
-    public static final Font FONT_SUBTITLE = new Font("Segoe UI", Font.BOLD, 18);
+    public static final Font FONT_SUBTITLE = new Font("Segoe UI", Font.BOLD, 17);
     public static final Font FONT_HEADER = new Font("Segoe UI", Font.BOLD, 14);
     public static final Font FONT_BODY = new Font("Segoe UI", Font.PLAIN, 13);
     public static final Font FONT_BODY_BOLD = new Font("Segoe UI", Font.BOLD, 13);
     public static final Font FONT_SMALL = new Font("Segoe UI", Font.PLAIN, 11);
     public static final Font FONT_CODE = new Font("Consolas", Font.BOLD, 13);
+
+    public static JLabel createLabel(String text) {
+        JLabel lbl = new JLabel(text);
+        lbl.setFont(FONT_BODY_BOLD);
+        lbl.setForeground(TEXT_PRIMARY);
+        return lbl;
+    }
 
     /**
      * Crea un botón moderno con gradiente dinámico, esquinas redondeadas y animación hover.
@@ -71,7 +78,7 @@ public final class ThemeConstants {
                 g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 12, 12));
 
                 // Borde sutil
-                g2.setColor(new Color(255, 255, 255, 40));
+                g2.setColor(new Color(255, 255, 255, 50));
                 g2.setStroke(new BasicStroke(1.2f));
                 g2.draw(new RoundRectangle2D.Float(0, 0, getWidth() - 1, getHeight() - 1, 12, 12));
 
@@ -158,28 +165,43 @@ public final class ThemeConstants {
     }
 
     /**
-     * Aplica diseño visual moderno y badges coloreados en las tablas.
+     * Aplica diseño visual moderno, alto contraste y badges coloreados en las tablas.
+     * Fuerza un HeaderRenderer personalizado para evitar que el Look & Feel de Windows dibuje cabeceras blancas.
      */
     public static void styleTable(JTable table) {
         table.setBackground(BG_CARD);
         table.setForeground(TEXT_PRIMARY);
-        table.setGridColor(new Color(38, 48, 74));
+        table.setGridColor(new Color(45, 58, 88));
         table.setFont(FONT_BODY);
-        table.setRowHeight(40);
-        table.setSelectionBackground(new Color(99, 102, 241, 140));
+        table.setRowHeight(42);
+        table.setSelectionBackground(new Color(99, 102, 241, 150));
         table.setSelectionForeground(Color.WHITE);
         table.setShowVerticalLines(false);
         table.setShowHorizontalLines(true);
 
         JTableHeader header = table.getTableHeader();
-        header.setBackground(BG_TABLE_HEADER);
-        header.setForeground(TEXT_PRIMARY);
-        header.setFont(FONT_HEADER);
         header.setPreferredSize(new Dimension(0, 44));
-        header.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, ACCENT_PRIMARY));
+        header.setReorderingAllowed(false);
 
-        // Renderizador con colores y centrado para badges
-        DefaultTableCellRenderer badgeRenderer = new DefaultTableCellRenderer() {
+        // Header Renderer personalizado con texto blanco nítido y fondo oscuro contrastado
+        header.setDefaultRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable t, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                JLabel lbl = new JLabel(value != null ? value.toString().toUpperCase() : "", SwingConstants.CENTER);
+                lbl.setOpaque(true);
+                lbl.setBackground(BG_TABLE_HEADER);
+                lbl.setForeground(new Color(255, 255, 255)); // Blanco puro
+                lbl.setFont(new Font("Segoe UI", Font.BOLD, 13));
+                lbl.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createMatteBorder(0, 0, 2, 1, ACCENT_PRIMARY),
+                        new EmptyBorder(10, 8, 10, 8)
+                ));
+                return lbl;
+            }
+        });
+
+        // Renderizador de Celdas con alto contraste y badges
+        DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable t, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(t, value, isSelected, hasFocus, row, column);
@@ -189,25 +211,28 @@ public final class ThemeConstants {
                     c.setBackground(row % 2 == 0 ? BG_CARD : BG_TABLE_ROW_ALT);
                     String valStr = value != null ? value.toString() : "";
                     if (valStr.contains("PERMITIDO") || valStr.contains("ACTIVO") || valStr.contains("APROBADA") || valStr.contains("DENTRO")) {
-                        c.setForeground(new Color(52, 211, 153)); // Emerald green
+                        c.setForeground(new Color(52, 211, 153)); // Verde Esmeralda
                         setFont(FONT_BODY_BOLD);
                     } else if (valStr.contains("DENEGADO") || valStr.contains("BLOQUEADO") || valStr.contains("RECHAZADA") || valStr.contains("ALERTA")) {
-                        c.setForeground(new Color(248, 113, 113)); // Red
+                        c.setForeground(new Color(248, 113, 113)); // Rojo Coral
                         setFont(FONT_BODY_BOLD);
                     } else if (valStr.contains("PENDIENTE")) {
-                        c.setForeground(new Color(251, 191, 36)); // Amber
+                        c.setForeground(new Color(251, 191, 36)); // Ámbar Dorado
                         setFont(FONT_BODY_BOLD);
                     } else {
-                        c.setForeground(TEXT_PRIMARY);
+                        c.setForeground(TEXT_PRIMARY); // Blanco nítido
                         setFont(FONT_BODY);
                     }
+                } else {
+                    c.setBackground(new Color(99, 102, 241, 180));
+                    c.setForeground(Color.WHITE);
                 }
                 return c;
             }
         };
 
         for (int i = 0; i < table.getColumnCount(); i++) {
-            table.getColumnModel().getColumn(i).setCellRenderer(badgeRenderer);
+            table.getColumnModel().getColumn(i).setCellRenderer(cellRenderer);
         }
     }
 }

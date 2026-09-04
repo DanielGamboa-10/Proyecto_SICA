@@ -25,6 +25,11 @@ public class PersonasZonasPanel extends JPanel {
     private DefaultTableModel zonasTableModel;
     private JTable zonasTable;
 
+    private JPanel contentCards;
+    private CardLayout contentCardLayout;
+    private JButton btnTabPersonas;
+    private JButton btnTabZonas;
+
     public PersonasZonasPanel(
             InMemoryPersonaRepositoryAdapter personaRepo,
             InMemoryZonaRepositoryAdapter zonaRepo
@@ -57,16 +62,51 @@ public class PersonasZonasPanel extends JPanel {
         headerPanel.add(title, BorderLayout.NORTH);
         headerPanel.add(subtitle, BorderLayout.SOUTH);
 
-        // Tabbed Panel moderno
-        JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.setBackground(ThemeConstants.BG_SIDEBAR);
-        tabbedPane.setForeground(ThemeConstants.TEXT_PRIMARY);
-        tabbedPane.setFont(ThemeConstants.FONT_HEADER);
+        // Barra de pestañas moderna (Segmented Switcher) con alto contraste
+        JPanel tabSwitcher = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
+        tabSwitcher.setOpaque(false);
+        tabSwitcher.setBorder(new EmptyBorder(0, 0, 8, 0));
 
-        // Tab 1: Personas
+        btnTabPersonas = ThemeConstants.createGradientButton(
+                "👤 Directorio de Personas",
+                ThemeConstants.ACCENT_PRIMARY,
+                ThemeConstants.ACCENT_CYAN,
+                Color.WHITE
+        );
+        btnTabZonas = ThemeConstants.createButton(
+                "🏢 Zonas y Puntos de Control",
+                ThemeConstants.BG_CARD,
+                ThemeConstants.TEXT_SECONDARY
+        );
+
+        contentCardLayout = new CardLayout();
+        contentCards = new JPanel(contentCardLayout);
+        contentCards.setOpaque(false);
+
+        btnTabPersonas.addActionListener(e -> {
+            btnTabPersonas.setBackground(ThemeConstants.ACCENT_PRIMARY);
+            btnTabPersonas.setForeground(Color.WHITE);
+            btnTabZonas.setBackground(ThemeConstants.BG_CARD);
+            btnTabZonas.setForeground(ThemeConstants.TEXT_SECONDARY);
+            contentCardLayout.show(contentCards, "PERSONAS");
+            cargarPersonas();
+        });
+
+        btnTabZonas.addActionListener(e -> {
+            btnTabZonas.setBackground(ThemeConstants.ACCENT_PRIMARY);
+            btnTabZonas.setForeground(Color.WHITE);
+            btnTabPersonas.setBackground(ThemeConstants.BG_CARD);
+            btnTabPersonas.setForeground(ThemeConstants.TEXT_SECONDARY);
+            contentCardLayout.show(contentCards, "ZONAS");
+            cargarZonas();
+        });
+
+        tabSwitcher.add(btnTabPersonas);
+        tabSwitcher.add(btnTabZonas);
+
+        // Card 1: Personas
         JPanel panelPersonas = new JPanel(new BorderLayout(0, 16));
         panelPersonas.setOpaque(false);
-        panelPersonas.setBorder(new EmptyBorder(16, 0, 0, 0));
 
         JPanel toolbarPersonas = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         toolbarPersonas.setOpaque(false);
@@ -98,13 +138,15 @@ public class PersonasZonasPanel extends JPanel {
         scrollPersonas.getViewport().setBackground(ThemeConstants.BG_CARD);
         scrollPersonas.setBorder(BorderFactory.createEmptyBorder());
 
-        panelPersonas.add(toolbarPersonas, BorderLayout.NORTH);
-        panelPersonas.add(scrollPersonas, BorderLayout.CENTER);
+        JPanel cardPersonasTable = ThemeConstants.createCard();
+        cardPersonasTable.setLayout(new BorderLayout(0, 12));
+        cardPersonasTable.add(toolbarPersonas, BorderLayout.NORTH);
+        cardPersonasTable.add(scrollPersonas, BorderLayout.CENTER);
+        panelPersonas.add(cardPersonasTable, BorderLayout.CENTER);
 
-        // Tab 2: Zonas de Seguridad
+        // Card 2: Zonas de Seguridad
         JPanel panelZonas = new JPanel(new BorderLayout(0, 16));
         panelZonas.setOpaque(false);
-        panelZonas.setBorder(new EmptyBorder(16, 0, 0, 0));
 
         String[] colsZonas = {"Código", "Nombre de Zona", "Aforo Máx", "Horario", "Puntos de Control Asociados", "Descripción"};
         zonasTableModel = new DefaultTableModel(colsZonas, 0) {
@@ -120,13 +162,21 @@ public class PersonasZonasPanel extends JPanel {
         scrollZonas.getViewport().setBackground(ThemeConstants.BG_CARD);
         scrollZonas.setBorder(BorderFactory.createEmptyBorder());
 
-        panelZonas.add(scrollZonas, BorderLayout.CENTER);
+        JPanel cardZonasTable = ThemeConstants.createCard();
+        cardZonasTable.setLayout(new BorderLayout(0, 12));
+        cardZonasTable.add(scrollZonas, BorderLayout.CENTER);
+        panelZonas.add(cardZonasTable, BorderLayout.CENTER);
 
-        tabbedPane.addTab("Directorio de Personas", panelPersonas);
-        tabbedPane.addTab("Zonas y Puntos de Control", panelZonas);
+        contentCards.add(panelPersonas, "PERSONAS");
+        contentCards.add(panelZonas, "ZONAS");
+
+        JPanel mainCenter = new JPanel(new BorderLayout(0, 12));
+        mainCenter.setOpaque(false);
+        mainCenter.add(tabSwitcher, BorderLayout.NORTH);
+        mainCenter.add(contentCards, BorderLayout.CENTER);
 
         add(headerPanel, BorderLayout.NORTH);
-        add(tabbedPane, BorderLayout.CENTER);
+        add(mainCenter, BorderLayout.CENTER);
     }
 
     public void cargarPersonas() {
@@ -195,12 +245,12 @@ public class PersonasZonasPanel extends JPanel {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Registrar Nueva Persona", true);
         dialog.setLayout(new BorderLayout(16, 16));
         dialog.getContentPane().setBackground(ThemeConstants.BG_DARK);
-        dialog.setSize(480, 500);
+        dialog.setSize(500, 520);
         dialog.setLocationRelativeTo(this);
 
-        JPanel form = new JPanel(new GridLayout(7, 2, 10, 12));
+        JPanel form = new JPanel(new GridLayout(7, 2, 12, 14));
         form.setOpaque(false);
-        form.setBorder(new EmptyBorder(20, 20, 20, 20));
+        form.setBorder(new EmptyBorder(20, 24, 20, 24));
 
         JComboBox<String> comboTipoDoc = ThemeConstants.createComboBox(new String[]{"CC", "CE", "PASAPORTE", "TI"});
         JTextField txtDoc = ThemeConstants.createTextField();
@@ -210,20 +260,26 @@ public class PersonasZonasPanel extends JPanel {
         JTextField txtEmail = ThemeConstants.createTextField();
         JComboBox<TipoPersona> comboTipo = ThemeConstants.createComboBox(TipoPersona.values());
 
-        form.add(new JLabel("Tipo Documento:"));
+        form.add(ThemeConstants.createLabel("Tipo Documento:"));
         form.add(comboTipoDoc);
-        form.add(new JLabel("Número Documento:"));
+        form.add(ThemeConstants.createLabel("Número Documento:"));
         form.add(txtDoc);
-        form.add(new JLabel("Nombres:"));
+        form.add(ThemeConstants.createLabel("Nombres:"));
         form.add(txtNombres);
-        form.add(new JLabel("Apellidos:"));
+        form.add(ThemeConstants.createLabel("Apellidos:"));
         form.add(txtApellidos);
-        form.add(new JLabel("Empresa / Dependencia:"));
+        form.add(ThemeConstants.createLabel("Empresa / Dependencia:"));
         form.add(txtEmpresa);
-        form.add(new JLabel("Email:"));
+        form.add(ThemeConstants.createLabel("Email:"));
         form.add(txtEmail);
-        form.add(new JLabel("Tipo de Persona:"));
+        form.add(ThemeConstants.createLabel("Tipo de Persona:"));
         form.add(comboTipo);
+
+        JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 16));
+        bottom.setOpaque(false);
+
+        JButton btnCancelar = ThemeConstants.createButton("Cancelar", ThemeConstants.BG_CARD, ThemeConstants.TEXT_SECONDARY);
+        btnCancelar.addActionListener(e -> dialog.dispose());
 
         JButton btnGuardar = ThemeConstants.createButton("Guardar Persona", ThemeConstants.ACCENT_PRIMARY, Color.WHITE);
         btnGuardar.addActionListener(e -> {
@@ -247,8 +303,11 @@ public class PersonasZonasPanel extends JPanel {
             }
         });
 
+        bottom.add(btnCancelar);
+        bottom.add(btnGuardar);
+
         dialog.add(form, BorderLayout.CENTER);
-        dialog.add(btnGuardar, BorderLayout.SOUTH);
+        dialog.add(bottom, BorderLayout.SOUTH);
         dialog.setVisible(true);
     }
 }
