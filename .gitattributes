@@ -1,0 +1,17 @@
+# Deteccion de codigo del proyecto SICA
+demo/** linguist-vendored=false
+demo/** linguist-documentation=false
+demo/** linguist-detectable=true
+
+# Lenguajes reconocidos: Java y SQL
+*.java linguist-detectable=true
+*.java linguist-language=Java
+
+database/** linguist-detectable=true
+*.sql linguist-detectable=true
+*.sql linguist-language=SQL
+
+# Excluir configuraciones y metadatos no solicitados
+*.xml linguist-detectable=false
+*.json linguist-detectable=false
+pom.xml linguist-detectable=false
