@@ -191,10 +191,22 @@ public class VisitasPanel extends JPanel {
             anfitrionModel.addElement(new PersonaComboItem(p.getId(), p.getNombreCompleto() + " (" + p.getTipoPersona() + ")"));
         }
 
+        JComboBox<PersonaComboItem> comboVisitante = new JComboBox<>(visitanteModel);
         comboVisitante.setBackground(ThemeConstants.BG_INPUT);
         comboVisitante.setForeground(ThemeConstants.TEXT_PRIMARY);
+
+        JComboBox<PersonaComboItem> comboAnfitrion = new JComboBox<>(anfitrionModel);
         comboAnfitrion.setBackground(ThemeConstants.BG_INPUT);
         comboAnfitrion.setForeground(ThemeConstants.TEXT_PRIMARY);
+
+        JTextField txtMotivo = ThemeConstants.createTextField();
+        txtMotivo.setText("Reunión de consultoría técnica");
+
+        JTextField txtHoras = ThemeConstants.createTextField();
+        txtHoras.setText("4");
+
+        JTextField txtPlaca = ThemeConstants.createTextField();
+        txtPlaca.setText("ABC-123");
 
         content.add(ThemeConstants.createLabel("Visitante:"));
         content.add(comboVisitante);
