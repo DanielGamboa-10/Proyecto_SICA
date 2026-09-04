@@ -104,10 +104,7 @@ public class ControlAccesoPanel extends JPanel {
             String nombreZona = zonaRepo.findZonaById(pc.getZonaId()).map(Zona::getNombre).orElse("Zona");
             pcModel.addElement(new PuntoControlComboItem(pc.getId(), pc.getCodigo() + " - " + pc.getNombre() + " (" + nombreZona + ")"));
         }
-        comboPuntosControl = new JComboBox<>(pcModel);
-        comboPuntosControl.setBackground(ThemeConstants.BG_INPUT);
-        comboPuntosControl.setForeground(ThemeConstants.TEXT_PRIMARY);
-        comboPuntosControl.setFont(ThemeConstants.FONT_BODY);
+        comboPuntosControl = ThemeConstants.createComboBox(pcModel);
 
         comboTipoAcceso = ThemeConstants.createComboBox(new TipoAcceso[]{TipoAcceso.ENTRADA, TipoAcceso.SALIDA});
 

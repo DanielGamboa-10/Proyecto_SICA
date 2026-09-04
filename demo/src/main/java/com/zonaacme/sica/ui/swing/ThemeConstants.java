@@ -157,11 +157,60 @@ public final class ThemeConstants {
 
     public static <T> JComboBox<T> createComboBox(T[] items) {
         JComboBox<T> combo = new JComboBox<>(items);
+        styleComboBox(combo);
+        return combo;
+    }
+
+    public static <T> JComboBox<T> createComboBox(ComboBoxModel<T> model) {
+        JComboBox<T> combo = new JComboBox<>(model);
+        styleComboBox(combo);
+        return combo;
+    }
+
+    public static <T> void styleComboBox(JComboBox<T> combo) {
         combo.setBackground(BG_INPUT);
         combo.setForeground(TEXT_PRIMARY);
         combo.setFont(FONT_BODY);
-        combo.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1, true));
-        return combo;
+        combo.setFocusable(false);
+
+        combo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                setOpaque(true);
+                if (isSelected) {
+                    setBackground(new Color(99, 102, 241));
+                    setForeground(Color.WHITE);
+                } else {
+                    setBackground(new Color(13, 19, 33));
+                    setForeground(new Color(248, 250, 252));
+                }
+                setFont(FONT_BODY);
+                setBorder(new EmptyBorder(8, 12, 8, 12));
+                return c;
+            }
+        });
+
+        combo.setUI(new javax.swing.plaf.basic.BasicComboBoxUI() {
+            @Override
+            protected JButton createArrowButton() {
+                JButton btn = super.createArrowButton();
+                btn.setBackground(new Color(26, 36, 60));
+                btn.setBorder(BorderFactory.createEmptyBorder());
+                return btn;
+            }
+
+            @Override
+            public void paintCurrentValueBackground(Graphics g, Rectangle bounds, boolean hasFocus) {
+                g.setColor(new Color(13, 19, 33));
+                g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+            }
+        });
+
+        combo.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1, true),
+                new EmptyBorder(4, 8, 4, 8)
+        ));
     }
 
     /**
