@@ -35,6 +35,7 @@ public class SicaGuiApplication {
         InMemoryPersonaRepositoryAdapter personaRepo = new InMemoryPersonaRepositoryAdapter();
         InMemoryZonaRepositoryAdapter zonaRepo = new InMemoryZonaRepositoryAdapter();
         InMemoryVisitaRepositoryAdapter visitaRepo = new InMemoryVisitaRepositoryAdapter();
+        visitaRepo.inicializarSemilla(personaRepo, zonaRepo);
         InMemoryRegistroAccesoRepositoryAdapter registroAccesoRepo = new InMemoryRegistroAccesoRepositoryAdapter();
         InMemoryAuditRepositoryAdapter auditRepo = new InMemoryAuditRepositoryAdapter();
         InMemoryNotificationRepositoryAdapter notificationRepo = new InMemoryNotificationRepositoryAdapter();

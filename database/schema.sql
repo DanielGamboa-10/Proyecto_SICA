@@ -1,25 +1,18 @@
--- =====================================================================
--- PROYECTO: SICA (Sistema Integrado de Control de Acceso)
--- COMPLEJO EMPRESARIAL: "ZONA ACME"
--- SCRIPT: schema.sql (Definición de Esquema DDL - MySQL / MariaDB)
--- =====================================================================
-
 DROP DATABASE IF EXISTS sica_db;
 CREATE DATABASE sica_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE sica_db;
 
--- =========== 1. TABLAS DE SEGURIDAD Y CONTROL DE ACCESO (RBAC) ===========
-
+-- =========== 1. SEGURIDAD Y CONTROL DE ACCESO (RBAC) ===========
 CREATE TABLE roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre_rol VARCHAR(50) UNIQUE NOT NULL
-) ENGINE=InnoDB COMMENT='Roles de seguridad del sistema';
+) ENGINE=InnoDB;
 
 CREATE TABLE permisos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre_permiso VARCHAR(100) UNIQUE NOT NULL,
     descripcion TEXT
-) ENGINE=InnoDB COMMENT='Acciones y permisos granulares del sistema';
+) ENGINE=InnoDB;
 
 CREATE TABLE rol_permisos (
     rol_id INT NOT NULL,
@@ -27,7 +20,7 @@ CREATE TABLE rol_permisos (
     PRIMARY KEY (rol_id, permiso_id),
     FOREIGN KEY (rol_id) REFERENCES roles(id) ON DELETE CASCADE,
     FOREIGN KEY (permiso_id) REFERENCES permisos(id) ON DELETE CASCADE
-) ENGINE=InnoDB COMMENT='Tabla intermedia de asignación de permisos a roles';
+) ENGINE=InnoDB;
 
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -38,24 +31,20 @@ CREATE TABLE usuarios (
     esta_activo BOOLEAN DEFAULT TRUE,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (rol_id) REFERENCES roles(id) ON DELETE SET NULL
-) ENGINE=InnoDB COMMENT='Cuentas de usuario autorizadas para operar SICA';
+) ENGINE=InnoDB;
 
-
--- =========== 2. TABLAS DE ESTADOS Y LOOKUPS ===========
-
+-- =========== 2. ESTADOS DE CONSULTA (LOOKUP TABLES) ===========
 CREATE TABLE persona_estados_acceso (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre_estado VARCHAR(50) UNIQUE NOT NULL
-) ENGINE=InnoDB COMMENT='Estados de acceso físico de personas (Activo, Con Prohibición)';
+) ENGINE=InnoDB;
 
 CREATE TABLE visita_estados (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre_estado VARCHAR(50) UNIQUE NOT NULL
-) ENGINE=InnoDB COMMENT='Estados del ciclo de vida de una visita';
+    nombre_estado VARCHAR(60) UNIQUE NOT NULL
+) ENGINE=InnoDB;
 
-
--- =========== 3. INFRAESTRUCTURA FÍSICA Y ZONAS DEL COMPLEJO ===========
-
+-- =========== 3. INFRAESTRUCTURA FÍSICA ===========
 CREATE TABLE zonas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     codigo VARCHAR(20) UNIQUE NOT NULL,
@@ -66,7 +55,7 @@ CREATE TABLE zonas (
     hora_cierre TIME DEFAULT '22:00:00',
     requiere_autorizacion_especial BOOLEAN DEFAULT FALSE,
     esta_activa BOOLEAN DEFAULT TRUE
-) ENGINE=InnoDB COMMENT='Zonas y áreas físicas del Complejo Zona Acme';
+) ENGINE=InnoDB;
 
 CREATE TABLE puntos_control (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -76,11 +65,9 @@ CREATE TABLE puntos_control (
     tipo_punto ENUM('TORNIQUETE_PEATONAL', 'TALANQUERA_VEHICULAR', 'PUERTA_BIOMETRICA') DEFAULT 'TORNIQUETE_PEATONAL',
     esta_activo BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (zona_id) REFERENCES zonas(id) ON DELETE CASCADE
-) ENGINE=InnoDB COMMENT='Dispositivos físicos de control de paso';
+) ENGINE=InnoDB;
 
-
--- =========== 4. ENTIDADES DEL NEGOCIO (EMPRESAS Y PERSONAS) ===========
-
+-- =========== 4. ENTIDADES DEL NEGOCIO ===========
 CREATE TABLE empresas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nit VARCHAR(20) UNIQUE NOT NULL,
@@ -90,7 +77,7 @@ CREATE TABLE empresas (
     telefono_contacto VARCHAR(20),
     piso_ubicacion VARCHAR(10),
     esta_activa BOOLEAN DEFAULT TRUE
-) ENGINE=InnoDB COMMENT='Empresas inquilinas del complejo Zona Acme';
+) ENGINE=InnoDB;
 
 CREATE TABLE personas (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -106,11 +93,9 @@ CREATE TABLE personas (
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (empresa_id) REFERENCES empresas(id) ON DELETE SET NULL,
     FOREIGN KEY (estado_acceso_id) REFERENCES persona_estados_acceso(id) ON DELETE RESTRICT
-) ENGINE=InnoDB COMMENT='Directorio unificado de personas del complejo';
+) ENGINE=InnoDB;
 
-
--- =========== 5. GESTIÓN TRANSACCIONAL DE VISITAS Y ACCESOS ===========
-
+-- =========== 5. TRANSACCIONAL DE VISITAS Y ACCESOS ===========
 CREATE TABLE visitas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     persona_id INT NOT NULL,
@@ -128,7 +113,7 @@ CREATE TABLE visitas (
     FOREIGN KEY (anfitrion_id) REFERENCES personas(id) ON DELETE SET NULL,
     FOREIGN KEY (estado_visita_id) REFERENCES visita_estados(id) ON DELETE RESTRICT,
     FOREIGN KEY (visita_aprobada_por) REFERENCES usuarios(id) ON DELETE SET NULL
-) ENGINE=InnoDB COMMENT='Registro transaccional de solicitudes y estancias de visitas';
+) ENGINE=InnoDB;
 
 CREATE TABLE registros_acceso (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -142,11 +127,9 @@ CREATE TABLE registros_acceso (
     FOREIGN KEY (persona_id) REFERENCES personas(id) ON DELETE CASCADE,
     FOREIGN KEY (punto_control_id) REFERENCES puntos_control(id) ON DELETE CASCADE,
     FOREIGN KEY (visita_id) REFERENCES visitas(id) ON DELETE SET NULL
-) ENGINE=InnoDB COMMENT='Paso físico atómico por torniquetes y barreras';
+) ENGINE=InnoDB;
 
-
--- =========== 6. INCIDENTES Y SEGURIDAD ===========
-
+-- =========== 6. INCIDENTES Y AUDITORÍA ===========
 CREATE TABLE incidentes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     visita_id INT,
@@ -159,10 +142,7 @@ CREATE TABLE incidentes (
     FOREIGN KEY (visita_id) REFERENCES visitas(id) ON DELETE SET NULL,
     FOREIGN KEY (persona_id) REFERENCES personas(id) ON DELETE CASCADE,
     FOREIGN KEY (reportado_por_id) REFERENCES usuarios(id) ON DELETE SET NULL
-) ENGINE=InnoDB COMMENT='Reportes de seguridad y novedades operativas';
-
-
--- =========== 7. BITÁCORA DE AUDITORÍA INMUTABLE ===========
+) ENGINE=InnoDB;
 
 CREATE TABLE bitacora_auditoria (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -174,7 +154,7 @@ CREATE TABLE bitacora_auditoria (
     direccion_ip VARCHAR(45) DEFAULT '127.0.0.1',
     detalles TEXT,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL
-) ENGINE=InnoDB COMMENT='Trazabilidad y registro forense inmutable de operaciones críticas';
+) ENGINE=InnoDB;
 
 -- Índices de alto rendimiento
 CREATE INDEX idx_personas_doc ON personas(documento_identidad);

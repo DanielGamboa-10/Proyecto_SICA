@@ -15,16 +15,29 @@ public class DatabaseConnection {
 
     private final String URL = "jdbc:mysql://localhost:3306/sica_db";
     private final String USER = "root";
-    private final String PASSWORD = ""; // Cambiar según configuración local
+    private final String PASSWORD = "12345wq"; // Cambiar según configuración local
 
     // Constructor privado para evitar instanciación externa
     private DatabaseConnection() {
         try {
-            // Registrar el driver
             Class.forName("com.mysql.cj.jdbc.Driver");
-            this.connection = DriverManager.getConnection(URL, USER, PASSWORD);
-        } catch (ClassNotFoundException | SQLException e) {
-            System.err.println("Error al conectar a la base de datos: " + e.getMessage());
+            String[] claves = {PASSWORD, "root", "1234", "123456", "admin", "12345wq", "mysql", "Password123*"};
+            for (String clave : claves) {
+                try {
+                    this.connection = DriverManager.getConnection(URL, USER, clave);
+                    if (this.connection != null && !this.connection.isClosed()) {
+                        System.out.println("✅ [SICA] Conexión establecida exitosamente con MySQL (sica_db)");
+                        break;
+                    }
+                } catch (SQLException ignored) {}
+            }
+            if (this.connection == null || this.connection.isClosed()) {
+                System.err.println("⚠️ [SICA] No se pudo conectar a MySQL con las contraseñas estándar. Revisa la clave en DatabaseConnection.java.");
+            }
+        } catch (ClassNotFoundException e) {
+            System.err.println("Error al cargar driver de MySQL: " + e.getMessage());
+        } catch (SQLException e) {
+            System.err.println("Error en conexión MySQL: " + e.getMessage());
         }
     }
 

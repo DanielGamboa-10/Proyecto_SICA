@@ -35,23 +35,31 @@ public class InMemoryZonaRepositoryAdapter implements ZonaRepositoryPort {
     }
 
     private void inicializarSemilla() {
-        Zona recepcion = Zona.nueva("ZONA_RECEPCION", "Recepción Principal", "Área de bienvenida y registro", 50, LocalTime.of(6, 0), LocalTime.of(22, 0), false);
-        Zona oficinas = Zona.nueva("ZONA_OFICINAS", "Oficinas Administrativas", "Pisos 1 y 2 Edificio Central", 80, LocalTime.of(7, 0), LocalTime.of(19, 0), false);
-        Zona datacenter = Zona.nueva("ZONA_DATACENTER", "Centro de Cómputo y Servidores", "Área crítica de alta seguridad", 5, LocalTime.of(8, 0), LocalTime.of(18, 0), true);
+        Zona lobby = Zona.nueva("ZONA_LOBBY", "Lobby Principal y Recepción", "Área de recepción general y torniquetes peatonales", 200, LocalTime.of(5, 0), LocalTime.of(23, 0), false);
+        Zona techHub = Zona.nueva("ZONA_TECH_HUB", "Torre de Innovación & Tech Hub", "Pisos corporativos de oficinas para empresas de tecnología", 350, LocalTime.of(6, 0), LocalTime.of(21, 0), false);
+        Zona bioLabs = Zona.nueva("ZONA_BIOLABS", "Laboratorios BioGen & Nanotecnología", "Área biocontenida de investigación farmacéutica", 80, LocalTime.of(7, 0), LocalTime.of(19, 0), true);
+        Zona datacenter = Zona.nueva("ZONA_DATACENTER", "Centro de Cómputo Principal (Tier IV)", "Sala de servidores críticos y telecomunicaciones", 15, LocalTime.of(0, 0), LocalTime.of(23, 59), true);
+        Zona parking = Zona.nueva("ZONA_PARKING", "Estacionamiento Subterráneo S1/S2", "Bahías vehiculares para funcionarios y visitantes", 150, LocalTime.of(5, 30), LocalTime.of(22, 30), false);
 
-        saveZona(recepcion);
-        saveZona(oficinas);
+        saveZona(lobby);
+        saveZona(techHub);
+        saveZona(bioLabs);
         saveZona(datacenter);
+        saveZona(parking);
 
-        PuntoControl torniquete1 = PuntoControl.nuevo("PC_TORN_01", "Torniquete Peatonal 1", recepcion.getId(), PuntoControl.TipoPunto.TORNIQUETE);
-        PuntoControl puertaOficinas = PuntoControl.nuevo("PC_PUERTA_OFI", "Puerta Acceso Oficinas", oficinas.getId(), PuntoControl.TipoPunto.PUERTA_AUTOMATICA);
-        PuntoControl barreraVehicular = PuntoControl.nuevo("PC_BARRERA_01", "Barrera Parqueadero Visitantes", recepcion.getId(), PuntoControl.TipoPunto.VEHICULAR);
-        PuntoControl puertaDataCenter = PuntoControl.nuevo("PC_PUERTA_DC", "Puerta Blindada Data Center", datacenter.getId(), PuntoControl.TipoPunto.PUERTA_AUTOMATICA);
+        PuntoControl torniquete1 = PuntoControl.nuevo("PC_TORN_01", "Torniquete Peatonal 1 (Entrada Norte)", lobby.getId(), PuntoControl.TipoPunto.TORNIQUETE);
+        PuntoControl torniquete2 = PuntoControl.nuevo("PC_TORN_02", "Torniquete Peatonal 2 (Entrada Sur)", lobby.getId(), PuntoControl.TipoPunto.TORNIQUETE);
+        PuntoControl puertaTech = PuntoControl.nuevo("PC_PUERTA_TECH", "Puerta Acceso Torre Tech Hub", techHub.getId(), PuntoControl.TipoPunto.PUERTA_AUTOMATICA);
+        PuntoControl esclusaBio = PuntoControl.nuevo("PC_BIO_ESCLUSA", "Esclusa Bioseguridad BioLabs", bioLabs.getId(), PuntoControl.TipoPunto.PUERTA_AUTOMATICA);
+        PuntoControl esclusaDc = PuntoControl.nuevo("PC_DC_RESTRINGIDO", "Esclusa de Seguridad Datacenter", datacenter.getId(), PuntoControl.TipoPunto.PUERTA_AUTOMATICA);
+        PuntoControl talanquera = PuntoControl.nuevo("PC_TALANQUERA_VEH", "Talanquera Vehicular Acceso S1", parking.getId(), PuntoControl.TipoPunto.VEHICULAR);
 
         savePuntoControl(torniquete1);
-        savePuntoControl(puertaOficinas);
-        savePuntoControl(barreraVehicular);
-        savePuntoControl(puertaDataCenter);
+        savePuntoControl(torniquete2);
+        savePuntoControl(puertaTech);
+        savePuntoControl(esclusaBio);
+        savePuntoControl(esclusaDc);
+        savePuntoControl(talanquera);
     }
 
     @Override
