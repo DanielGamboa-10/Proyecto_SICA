@@ -13,9 +13,9 @@ public class DatabaseConnection {
     private static DatabaseConnection instance;
     private Connection connection;
 
-    private final String URL = "jdbc:mysql://localhost:3306/sica_db";
-    private final String USER = "root";
-    private final String PASSWORD = "12345wq"; // Cambiar según configuración local
+    private final String URL = "jdbc:mysql://localhost:3307/campus";
+    private final String USER = "campus";
+    private final String PASSWORD = "campus123"; // Cambiar según configuración local
 
     // Constructor privado para evitar instanciación externa
     private DatabaseConnection() {
