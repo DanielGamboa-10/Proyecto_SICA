@@ -16,7 +16,8 @@ public enum ResultadoAcceso {
     DENEGADO_FUERA_DE_HORARIO("Denegado: Intento de ingreso fuera de la franja horaria autorizada"),
     DENEGADO_ZONA_NO_AUTORIZADA("Denegado: La zona solicitada no está incluida en los permisos de la visita"),
     DENEGADO_PUNTO_CONTROL_INACTIVO("Denegado: El torniquete o punto de control se encuentra fuera de servicio"),
-    DENEGADO_AFORO_MAXIMO("Denegado: La zona ha alcanzado su capacidad o aforo máximo permitido");
+    DENEGADO_AFORO_MAXIMO("Denegado: La zona ha alcanzado su capacidad o aforo máximo permitido"),
+    DENEGADO_EVACUACION_EMERGENCIA("Denegado: Protocolo de evacuación y emergencia global activo. Ingreso restringido");
 
     private final String mensaje;
 

@@ -81,15 +81,22 @@ public class ReportesPanel extends JPanel {
         JPanel btnBox = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         btnBox.setOpaque(false);
 
-        JButton btnExportar = ThemeConstants.createGradientButton("Exportar CSV",
+        // KEY_EXPORT_CSV: Botón de exportación I/O CSV
+        JButton btnExportarCSV = ThemeConstants.createGradientButton("Exportar CSV",
                 ThemeConstants.ACCENT_PRIMARY, new Color(79, 70, 229), Color.WHITE);
-        btnExportar.addActionListener(e -> exportarCSV());
+        btnExportarCSV.addActionListener(e -> exportarCSV());
+
+        // KEY_EXPORT_CSV: Botón de exportación I/O TXT / Planilla de Emergencia
+        JButton btnExportarTxt = ThemeConstants.createGradientButton("Exportar TXT Planilla",
+                ThemeConstants.ACCENT_CYAN, new Color(14, 116, 144), Color.WHITE);
+        btnExportarTxt.addActionListener(e -> exportarPlanillaEvacuacionTxt());
 
         JButton btnRefrescar = ThemeConstants.createButton("Refrescar",
                 ThemeConstants.BG_CARD_HOVER, ThemeConstants.TEXT_PRIMARY);
         btnRefrescar.addActionListener(e -> generarReporteSeleccionado());
 
-        btnBox.add(btnExportar);
+        btnBox.add(btnExportarCSV);
+        btnBox.add(btnExportarTxt);
         btnBox.add(btnRefrescar);
         headerPanel.add(btnBox, BorderLayout.EAST);
 
@@ -129,13 +136,22 @@ public class ReportesPanel extends JPanel {
                 "2. Aforo y Capacidad Máxima por Zonas (Stream API)",
                 "3. Estado y Frecuencia de Visitas (Stream API)",
                 "4. Desglose de Incidentes por Gravedad y Sanción (Stream API)",
-                "5. Transacciones de Acceso: Permitidos vs Denegados (Stream API)"
+                "5. Transacciones de Acceso: Permitidos vs Denegados (Stream API)",
+                "6. Top Visitantes Más Frecuentes (Stream API)",
+                "7. Distribución de Accesos por Hora Pico (Stream API)"
         };
         cmbTipoReporte = new JComboBox<>(reportesOpciones);
         ThemeConstants.styleComboBox(cmbTipoReporte);
         cmbTipoReporte.setPreferredSize(new Dimension(460, 32));
         cmbTipoReporte.addActionListener(e -> generarReporteSeleccionado());
         filterBar.add(cmbTipoReporte);
+
+        // KEY_BUSCADOR_REALTIME: Campo de búsqueda reactivo en reportes
+        JLabel lblBuscar = ThemeConstants.createLabel("Buscar:");
+        JTextField txtBuscar = ThemeConstants.createTextField("Filtrar reporte...");
+        txtBuscar.setPreferredSize(new Dimension(160, 32));
+        filterBar.add(lblBuscar);
+        filterBar.add(txtBuscar);
 
         centerPanel.add(filterBar, BorderLayout.NORTH);
 
@@ -148,6 +164,9 @@ public class ReportesPanel extends JPanel {
         tableModel = new DefaultTableModel();
         reportesTable = new JTable(tableModel);
         ThemeConstants.styleTable(reportesTable);
+
+        // KEY_BUSCADOR_REALTIME: Conectar filtro dinámico
+        ThemeConstants.instalarBuscadorDinamico(txtBuscar, reportesTable);
 
         JScrollPane tableScroll = ThemeConstants.createScrollPane(reportesTable);
         split.setTopComponent(tableScroll);
@@ -194,6 +213,7 @@ public class ReportesPanel extends JPanel {
         return card;
     }
 
+    // KEY_STREAM_REPORTES: Generación centralizada de analítica mediante Java Streams
     public void generarReporteSeleccionado() {
         List<Persona> personas = personaRepository.findAll();
         List<Zona> zonas = zonaRepository.findAllZonas();
@@ -224,6 +244,12 @@ public class ReportesPanel extends JPanel {
                 break;
             case 4:
                 reporteTransaccionesAcceso(accesos);
+                break;
+            case 5:
+                reporteTopVisitantes(visitas, personas);
+                break;
+            case 6:
+                reporteHorasPico(accesos);
                 break;
             default:
                 break;
@@ -409,6 +435,52 @@ public class ReportesPanel extends JPanel {
         txtResumenStream.setText(sb.toString());
     }
 
+    // KEY_STREAM_REPORTES: 6. Top Visitantes Más Frecuentes
+    private void reporteTopVisitantes(List<SolicitudVisita> visitas, List<Persona> personas) {
+        tableModel.setDataVector(new Object[][]{}, new String[]{"Ranking", "Visitante ID", "Nombre Completo", "Documento", "Total Visitas Registradas"});
+
+        Map<String, Long> ranking = com.zonaacme.sica.core.services.ReportesStreamService.calcularTopVisitantes(visitas, 10);
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== TOP VISITANTES MÁS FRECUENTES (Java Streams groupingBy + sorted) ===\n");
+
+        int pos = 1;
+        for (Map.Entry<String, Long> entry : ranking.entrySet()) {
+            String visId = entry.getKey();
+            Long cant = entry.getValue();
+            Persona p = personas.stream().filter(per -> per.getId().equals(visId)).findFirst().orElse(null);
+            String nom = p != null ? p.getNombreCompleto() : "N/A";
+            String doc = p != null ? p.getNumeroDocumento() : "N/A";
+
+            tableModel.addRow(new Object[]{"#" + pos, visId, nom, doc, cant});
+            sb.append(String.format("#%d %-25s (%s) -> %d visitas registradas\n", pos, nom, doc, cant));
+            pos++;
+        }
+
+        txtResumenStream.setText(sb.toString());
+    }
+
+    // KEY_STREAM_REPORTES: 7. Distribución por Horas Pico
+    private void reporteHorasPico(List<RegistroAcceso> accesos) {
+        tableModel.setDataVector(new Object[][]{}, new String[]{"Franja Horaria", "Accesos Registrados", "Nivel de Flujo"});
+
+        Map<Integer, Long> porHora = com.zonaacme.sica.core.services.ReportesStreamService.calcularAccesosPorHora(accesos);
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== ANÁLISIS DE FLUJO PEAK / HORAS PICO (Java Streams groupingBy TreeMap) ===\n");
+
+        for (Map.Entry<Integer, Long> entry : porHora.entrySet()) {
+            int hora = entry.getKey();
+            long cant = entry.getValue();
+            String nivel = cant > 5 ? "ALTO / PICO" : (cant > 2 ? "MEDIO" : "BAJO");
+            String franja = String.format("%02d:00 - %02d:59", hora, hora);
+
+            tableModel.addRow(new Object[]{franja, cant, nivel});
+            sb.append(String.format("• %-15s : %2d ingresos [%s]\n", franja, cant, nivel));
+        }
+
+        txtResumenStream.setText(sb.toString());
+    }
+
+    // KEY_EXPORT_CSV: Exportación estándar de la tabla en pantalla
     private void exportarCSV() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Guardar Informe SICA en Formato CSV");
@@ -440,6 +512,31 @@ public class ReportesPanel extends JPanel {
                         JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Error al exportar: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    // KEY_EXPORT_CSV: Exportación de planilla de evacuación / personal en sitio en formato TXT
+    private void exportarPlanillaEvacuacionTxt() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Exportar Planilla de Evacuación / Personal en Sitio (TXT)");
+        fileChooser.setSelectedFile(new File("planilla_evacuacion_" + System.currentTimeMillis() + ".txt"));
+
+        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File f = fileChooser.getSelectedFile();
+            try {
+                com.zonaacme.sica.core.services.ExportadorArchivosService.exportarPlanillaEvacuacionTxt(
+                        visitaRepository.findAll(),
+                        personaRepository.findAll(),
+                        f.toPath()
+                );
+
+                JOptionPane.showMessageDialog(this,
+                        "Planilla de Evacuación TXT exportada exitosamente a:\n" + f.getAbsolutePath(),
+                        "Exportación TXT Exitosa",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error al exportar planilla TXT: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

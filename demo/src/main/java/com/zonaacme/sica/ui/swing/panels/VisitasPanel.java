@@ -112,11 +112,24 @@ public class VisitasPanel extends JPanel {
         title.setFont(ThemeConstants.FONT_TITLE);
         title.setForeground(ThemeConstants.TEXT_PRIMARY);
 
-        JLabel subtitle = new JLabel("Pre-registro estándar, invitados no anunciados, pases provisionales y regularización de salidas.");
+        // KEY_POLLING_GUARDA: Indicador en vivo de actualización de la UI del guarda
+        JPanel titleRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
+        titleRow.setOpaque(false);
+        titleRow.add(title);
+        JLabel badgePolling = new JLabel("LIVE POLLING (3s)");
+        badgePolling.setFont(ThemeConstants.FONT_SMALL);
+        badgePolling.setForeground(new Color(52, 211, 153));
+        badgePolling.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(16, 185, 129, 150), 1, true),
+                new EmptyBorder(2, 8, 2, 8)
+        ));
+        titleRow.add(badgePolling);
+
+        JLabel subtitle = new JLabel("Pre-registro estándar, invitados no anunciados, pases provisionales, reasignación y cierre masivo.");
         subtitle.setFont(ThemeConstants.FONT_BODY);
         subtitle.setForeground(ThemeConstants.TEXT_MUTED);
 
-        headerText.add(title);
+        headerText.add(titleRow);
         headerText.add(subtitle);
 
         // Barra de Herramientas Principal
@@ -143,12 +156,24 @@ public class VisitasPanel extends JPanel {
                 new Color(168, 85, 247), new Color(126, 34, 206), Color.WHITE);
         btnSalidaOlvidada.addActionListener(e -> accionarRegularizarSalida());
 
+        // KEY_CIERRE_JORNADA: Botón para cierre masivo de visitas activas al fin de jornada
+        JButton btnCierreJornada = ThemeConstants.createGradientButton("Cierre de Jornada",
+                new Color(225, 29, 72), new Color(159, 18, 57), Color.WHITE);
+        btnCierreJornada.addActionListener(e -> accionarCierreJornada());
+
+        // KEY_REASIGNAR_ANFITRION: Botón para reasignar anfitrión en vivo
+        JButton btnReasignar = ThemeConstants.createGradientButton("Reasignar Anfitrión",
+                ThemeConstants.ACCENT_INFO, new Color(67, 56, 202), Color.WHITE);
+        btnReasignar.addActionListener(e -> accionarReasignarAnfitrion());
+
         specialFlowsBar.add(btnNuevaVisita);
         specialFlowsBar.add(btnInvitadoNoAnunciado);
         specialFlowsBar.add(btnOlvidoCarnet);
         specialFlowsBar.add(btnSalidaOlvidada);
+        specialFlowsBar.add(btnReasignar);
+        specialFlowsBar.add(btnCierreJornada);
 
-        // Fila 2: Aprobaciones y Operaciones en Torniquetes
+        // Fila 2: Aprobaciones, Operaciones y Buscador en Tiempo Real
         JPanel opsBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         opsBar.setOpaque(false);
 
@@ -172,6 +197,11 @@ public class VisitasPanel extends JPanel {
         JButton btnRefrescar = ThemeConstants.createButton("Refrescar", ThemeConstants.BG_CARD_HOVER, ThemeConstants.TEXT_PRIMARY);
         btnRefrescar.addActionListener(e -> cargarVisitas());
 
+        // KEY_BUSCADOR_REALTIME: Campo de búsqueda reactivo
+        JLabel lblBuscar = ThemeConstants.createLabel("Buscar:");
+        JTextField txtBuscar = ThemeConstants.createTextField("Filtrar por nombre, doc o anfitrión...");
+        txtBuscar.setPreferredSize(new Dimension(200, 36));
+
         opsBar.add(ThemeConstants.createLabel("Filtrar: "));
         opsBar.add(comboFiltroEstado);
         opsBar.add(btnAprobar);
@@ -179,6 +209,8 @@ public class VisitasPanel extends JPanel {
         opsBar.add(btnCheckIn);
         opsBar.add(btnCheckOut);
         opsBar.add(btnRefrescar);
+        opsBar.add(lblBuscar);
+        opsBar.add(txtBuscar);
 
         actionsBox.add(specialFlowsBar, BorderLayout.NORTH);
         actionsBox.add(opsBar, BorderLayout.SOUTH);
@@ -203,6 +235,9 @@ public class VisitasPanel extends JPanel {
         visitasTable = new JTable(tableModel);
         ThemeConstants.styleTable(visitasTable);
         visitasTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        // KEY_BUSCADOR_REALTIME: Instalación del buscador dinámico con RowFilter
+        ThemeConstants.instalarBuscadorDinamico(txtBuscar, visitasTable);
 
         JScrollPane scrollPane = ThemeConstants.createScrollPane(visitasTable);
         tableContainer.add(scrollPane, BorderLayout.CENTER);
@@ -520,13 +555,14 @@ public class VisitasPanel extends JPanel {
     // FLUJO 4: REGULARIZACIÓN DE SALIDA OLVIDADA
     // =========================================================================
     private void accionarRegularizarSalida() {
-        int row = visitasTable.getSelectedRow();
-        if (row < 0) {
+        int viewRow = visitasTable.getSelectedRow();
+        if (viewRow < 0) {
             JOptionPane.showMessageDialog(this,
                     "Seleccione una visita en estado 'EN_CURSO' para regularizar la salida olvidada.",
                     "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        int row = visitasTable.convertRowIndexToModel(viewRow);
 
         String visitaId = (String) tableModel.getValueAt(row, 0);
         String estado = (String) tableModel.getValueAt(row, 7);
@@ -559,17 +595,133 @@ public class VisitasPanel extends JPanel {
         }
     }
 
+    // =========================================================================
+    // KEY_CIERRE_JORNADA: CIERRE MASIVO AUTOMATIZADO DE VISITAS ACTIVAS
+    // =========================================================================
+    private void accionarCierreJornada() {
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "¿Está seguro de ejecutar el CIERRE DE JORNADA masivo?\nTodas las visitas actualmente en estado 'EN_CURSO' se finalizarán automáticamente.",
+                "Confirmar Cierre Masivo de Jornada",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+
+        if (confirm != JOptionPane.YES_OPTION) return;
+
+        try {
+            String usuario = sesionActual != null ? sesionActual.getUsername() : "operador";
+            int cerradas = visitaService.cerrarVisitasFinJornada(usuario);
+
+            JOptionPane.showMessageDialog(this,
+                    "🌙 Cierre de jornada completado con éxito.\nTotal de visitas cerradas automáticamente: " + cerradas,
+                    "Cierre de Jornada Exitoso",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+            cargarVisitas();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error en cierre de jornada: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // =========================================================================
+    // KEY_REASIGNAR_ANFITRION: REASIGNACIÓN DINÁMICA DE ANFITRION RESPONSABLE
+    // =========================================================================
+    private void accionarReasignarAnfitrion() {
+        int viewRow = visitasTable.getSelectedRow();
+        if (viewRow < 0) {
+            JOptionPane.showMessageDialog(this, "Seleccione una visita en la tabla para reasignar su anfitrión.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        int row = visitasTable.convertRowIndexToModel(viewRow);
+        String visitaId = (String) tableModel.getValueAt(row, 0);
+        String visitanteNombre = (String) tableModel.getValueAt(row, 1);
+
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Reasignar Anfitrión Responsable", true);
+        dialog.setLayout(new BorderLayout(16, 16));
+        dialog.getContentPane().setBackground(ThemeConstants.BG_DARK);
+        dialog.setSize(580, 360);
+        dialog.setLocationRelativeTo(this);
+
+        JPanel header = new JPanel(new GridLayout(2, 1, 0, 4));
+        header.setOpaque(false);
+        header.setBorder(new EmptyBorder(18, 24, 0, 24));
+
+        JLabel lblTitle = new JLabel("Reasignación Dinámica de Anfitrión");
+        lblTitle.setFont(ThemeConstants.FONT_TITLE);
+        lblTitle.setForeground(ThemeConstants.TEXT_PRIMARY);
+
+        JLabel lblSub = new JLabel("Visitante: " + visitanteNombre + " (ID: " + visitaId.substring(0, Math.min(8, visitaId.length())) + "...)");
+        lblSub.setFont(ThemeConstants.FONT_BODY);
+        lblSub.setForeground(ThemeConstants.isLightMode ? new Color(109, 40, 217) : ThemeConstants.ACCENT_PURPLE);
+        header.add(lblTitle);
+        header.add(lblSub);
+
+        JPanel content = new JPanel(new GridLayout(2, 2, 14, 16));
+        content.setOpaque(false);
+        content.setBorder(new EmptyBorder(16, 24, 16, 24));
+
+        List<Persona> personas = personaRepo.findAll();
+        DefaultComboBoxModel<PersonaComboItem> anfitrionModel = new DefaultComboBoxModel<>();
+        for (Persona p : personas) {
+            if (p.getTipoPersona() == TipoPersona.EMPLEADO) {
+                anfitrionModel.addElement(new PersonaComboItem(p.getId(), p.getNombreCompleto() + " (" + p.getEmpresa() + ")"));
+            }
+        }
+
+        JComboBox<PersonaComboItem> comboNuevoAnfitrion = ThemeConstants.createComboBox(anfitrionModel);
+        JTextField txtMotivo = ThemeConstants.createTextField("Ausencia justificada / Cambio de turno");
+
+        content.add(ThemeConstants.createLabel("Nuevo Anfitrión:"));
+        content.add(comboNuevoAnfitrion);
+        content.add(ThemeConstants.createLabel("Motivo de Reasignación:"));
+        content.add(txtMotivo);
+
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 14));
+        btnPanel.setOpaque(false);
+
+        JButton btnCancelar = ThemeConstants.createButton("Cancelar", ThemeConstants.BG_CARD_HOVER, ThemeConstants.TEXT_PRIMARY);
+        btnCancelar.addActionListener(e -> dialog.dispose());
+
+        JButton btnConfirmar = ThemeConstants.createGradientButton(
+                "Confirmar Reasignación",
+                ThemeConstants.ACCENT_PRIMARY,
+                new Color(79, 70, 229),
+                Color.WHITE
+        );
+        btnConfirmar.addActionListener(e -> {
+            PersonaComboItem sel = (PersonaComboItem) comboNuevoAnfitrion.getSelectedItem();
+            if (sel == null) return;
+            try {
+                String token = sesionActual != null ? sesionActual.getToken() : "TOKEN_SISTEMA";
+                visitaService.reasignarAnfitrionVisita(visitaId, sel.id, txtMotivo.getText().trim(), token);
+                JOptionPane.showMessageDialog(dialog, "Anfitrión reasignado correctamente a: " + sel.label, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                dialog.dispose();
+                cargarVisitas();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(dialog, "Error al reasignar: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        btnPanel.add(btnCancelar);
+        btnPanel.add(btnConfirmar);
+
+        dialog.add(header, BorderLayout.NORTH);
+        dialog.add(content, BorderLayout.CENTER);
+        dialog.add(btnPanel, BorderLayout.SOUTH);
+        dialog.setVisible(true);
+    }
+
     private void accionarAprobacion(boolean aprobar) {
         if (!sesionActual.getRol().tienePermiso("VISITAS_APROBAR")) {
             JOptionPane.showMessageDialog(this, "Su rol no tiene autorización para aprobar o rechazar visitas.", "Acceso Denegado (RBAC)", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        int row = visitasTable.getSelectedRow();
-        if (row < 0) {
+        int viewRow = visitasTable.getSelectedRow();
+        if (viewRow < 0) {
             JOptionPane.showMessageDialog(this, "Seleccione una visita de la tabla", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        int row = visitasTable.convertRowIndexToModel(viewRow);
 
         String visitaId = (String) tableModel.getValueAt(row, 0);
         String obs = JOptionPane.showInputDialog(this, "Ingrese una observación / motivo:", aprobar ? "Visita autorizada por recepción" : "Rechazada por política interna");
@@ -595,11 +747,12 @@ public class VisitasPanel extends JPanel {
             return;
         }
 
-        int row = visitasTable.getSelectedRow();
-        if (row < 0) {
+        int viewRow = visitasTable.getSelectedRow();
+        if (viewRow < 0) {
             JOptionPane.showMessageDialog(this, "Seleccione una visita de la tabla", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        int row = visitasTable.convertRowIndexToModel(viewRow);
         String visitaId = (String) tableModel.getValueAt(row, 0);
         try {
             SolicitudVisita v = visitaRepo.findById(visitaId).orElseThrow();
@@ -618,11 +771,12 @@ public class VisitasPanel extends JPanel {
             return;
         }
 
-        int row = visitasTable.getSelectedRow();
-        if (row < 0) {
+        int viewRow = visitasTable.getSelectedRow();
+        if (viewRow < 0) {
             JOptionPane.showMessageDialog(this, "Seleccione una visita de la tabla", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        int row = visitasTable.convertRowIndexToModel(viewRow);
         String visitaId = (String) tableModel.getValueAt(row, 0);
         try {
             SolicitudVisita v = visitaRepo.findById(visitaId).orElseThrow();
@@ -635,6 +789,7 @@ public class VisitasPanel extends JPanel {
         }
     }
 
+    // KEY_POLLING_GUARDA: Timer en segundo plano no bloqueante para refresco en tiempo real
     private void iniciarAutoRefresh() {
         autoRefreshTimer = new javax.swing.Timer(3000, e -> {
             if (isShowing()) {

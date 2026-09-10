@@ -147,10 +147,13 @@ public class ControlAccesoPanel extends JPanel {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(6, 10, 20));
+                boolean light = ThemeConstants.isLightMode;
+                Color bg = light ? new Color(248, 250, 252) : new Color(12, 9, 24);
+                Color border = light ? new Color(203, 213, 225) : new Color(56, 38, 96);
+                g2.setColor(bg);
                 g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 16, 16));
-                g2.setColor(new Color(30, 41, 67));
-                g2.setStroke(new BasicStroke(2f));
+                g2.setColor(border);
+                g2.setStroke(new BasicStroke(1.5f));
                 g2.draw(new RoundRectangle2D.Float(0, 0, getWidth() - 1, getHeight() - 1, 16, 16));
                 g2.dispose();
                 super.paintComponent(g);
@@ -168,24 +171,27 @@ public class ControlAccesoPanel extends JPanel {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(getBackground());
                 g2.fillOval(getWidth() / 2 - 14, 2, 28, 28);
+                g2.setColor(new Color(255, 255, 255, 80));
+                g2.setStroke(new BasicStroke(1.2f));
+                g2.drawOval(getWidth() / 2 - 14, 2, 28, 28);
                 g2.dispose();
                 super.paintComponent(g);
             }
         };
         lightIndicator.setOpaque(false);
-        lightIndicator.setBackground(new Color(75, 85, 99));
+        lightIndicator.setBackground(new Color(148, 163, 184));
         lightIndicator.setPreferredSize(new Dimension(0, 36));
 
         JPanel textStatusPanel = new JPanel(new GridLayout(3, 1, 6, 6));
         textStatusPanel.setOpaque(false);
 
         lblStatusBadge = new JLabel("ESPERANDO CREDENCIAL", SwingConstants.CENTER);
-        lblStatusBadge.setFont(new Font("Consolas", Font.BOLD, 22));
-        lblStatusBadge.setForeground(ThemeConstants.TEXT_MUTED);
+        lblStatusBadge.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblStatusBadge.setForeground(ThemeConstants.isLightMode ? new Color(71, 85, 105) : new Color(192, 132, 252));
 
         lblStatusPersona = new JLabel("Presente documento o carnet en el lector", SwingConstants.CENTER);
         lblStatusPersona.setFont(ThemeConstants.FONT_HEADER);
-        lblStatusPersona.setForeground(ThemeConstants.TEXT_SECONDARY);
+        lblStatusPersona.setForeground(ThemeConstants.TEXT_PRIMARY);
 
         lblStatusDetail = new JLabel("Listo para procesar eventos de paso", SwingConstants.CENTER);
         lblStatusDetail.setFont(ThemeConstants.FONT_SMALL);
@@ -207,22 +213,31 @@ public class ControlAccesoPanel extends JPanel {
                 0,
                 0,
                 ThemeConstants.FONT_SMALL,
-                ThemeConstants.ACCENT_CYAN
+                ThemeConstants.isLightMode ? new Color(79, 70, 229) : ThemeConstants.ACCENT_CYAN
         ));
 
-        JButton btnEmpleadoValido = ThemeConstants.createButton("1. Empleado Válido (CC 10102020)", ThemeConstants.BG_CARD_HOVER, ThemeConstants.TEXT_PRIMARY);
+        JButton btnEmpleadoValido = ThemeConstants.createGradientButton(
+                "1. Empleado Válido (CC 10102020)",
+                new Color(79, 70, 229), new Color(67, 56, 202), Color.WHITE
+        );
         btnEmpleadoValido.addActionListener(e -> {
             txtNumeroDoc.setText("10102020");
             comboTipoDoc.setSelectedItem("CC");
         });
 
-        JButton btnVisitanteValido = ThemeConstants.createButton("2. Invitado con Visita (CC 80809090)", ThemeConstants.BG_CARD_HOVER, ThemeConstants.TEXT_PRIMARY);
+        JButton btnVisitanteValido = ThemeConstants.createGradientButton(
+                "2. Invitado con Visita (CC 80809090)",
+                new Color(147, 51, 234), new Color(126, 34, 206), Color.WHITE
+        );
         btnVisitanteValido.addActionListener(e -> {
             txtNumeroDoc.setText("80809090");
             comboTipoDoc.setSelectedItem("CC");
         });
 
-        JButton btnBloqueado = ThemeConstants.createButton("3. Persona Bloqueada (CC 99998888)", ThemeConstants.BG_CARD_HOVER, ThemeConstants.TEXT_PRIMARY);
+        JButton btnBloqueado = ThemeConstants.createGradientButton(
+                "3. Persona Bloqueada (CC 99998888)",
+                new Color(225, 29, 72), new Color(159, 18, 57), Color.WHITE
+        );
         btnBloqueado.addActionListener(e -> {
             txtNumeroDoc.setText("99998888");
             comboTipoDoc.setSelectedItem("CC");

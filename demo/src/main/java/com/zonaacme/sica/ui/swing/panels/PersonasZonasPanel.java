@@ -136,6 +136,11 @@ public class PersonasZonasPanel extends JPanel {
         JPanel toolbarPersonas = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         toolbarPersonas.setOpaque(false);
 
+        // KEY_BUSCADOR_REALTIME: Buscador reactivo para el directorio de personas
+        JLabel lblBuscarPer = ThemeConstants.createLabel("Buscar:");
+        JTextField txtBuscarPer = ThemeConstants.createTextField("Filtrar por nombre o doc...");
+        txtBuscarPer.setPreferredSize(new Dimension(170, 36));
+
         btnNuevaPersona = ThemeConstants.createButton("Registrar Persona", ThemeConstants.ACCENT_PRIMARY, Color.WHITE);
         btnNuevaPersona.addActionListener(e -> mostrarModalNuevaPersona());
 
@@ -145,6 +150,8 @@ public class PersonasZonasPanel extends JPanel {
         btnBloquear = ThemeConstants.createButton("Bloquear Acceso", ThemeConstants.ACCENT_DANGER, Color.WHITE);
         btnBloquear.addActionListener(e -> alternarEstadoPersona(false));
 
+        toolbarPersonas.add(lblBuscarPer);
+        toolbarPersonas.add(txtBuscarPer);
         toolbarPersonas.add(btnNuevaPersona);
         toolbarPersonas.add(btnHabilitar);
         toolbarPersonas.add(btnBloquear);
@@ -158,6 +165,9 @@ public class PersonasZonasPanel extends JPanel {
         };
         personasTable = new JTable(personasTableModel);
         ThemeConstants.styleTable(personasTable);
+
+        // KEY_BUSCADOR_REALTIME: Conectar filtro reactivo
+        ThemeConstants.instalarBuscadorDinamico(txtBuscarPer, personasTable);
 
         JScrollPane scrollPersonas = ThemeConstants.createScrollPane(personasTable);
 
@@ -247,11 +257,12 @@ public class PersonasZonasPanel extends JPanel {
             return;
         }
 
-        int row = personasTable.getSelectedRow();
-        if (row < 0) {
+        int viewRow = personasTable.getSelectedRow();
+        if (viewRow < 0) {
             JOptionPane.showMessageDialog(this, "Seleccione una persona de la tabla", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        int row = personasTable.convertRowIndexToModel(viewRow);
 
         String personaId = (String) personasTableModel.getValueAt(row, 0);
         Persona p = personaRepo.findById(personaId).orElse(null);

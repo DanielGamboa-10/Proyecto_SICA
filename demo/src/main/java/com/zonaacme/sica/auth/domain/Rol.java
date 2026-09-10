@@ -18,6 +18,10 @@ import java.util.Set;
  */
 public enum Rol {
 
+    // ============================================================================
+    // PALABRA CLAVE DE BÚSQUEDA EXAMEN: KEY_PERMISOS_RBAC
+    // FUNCIONALIDAD #3: Nuevo Permiso Granular RBAC en Base de Datos / Dominio
+    // ============================================================================
     ADMINISTRADOR("Administrador del Sistema", Set.of(
             new Permiso("USUARIOS_GESTIONAR", "Gestión de Usuarios"),
             new Permiso("ROLES_ASIGNAR", "Asignación de Roles"),
@@ -25,11 +29,16 @@ public enum Rol {
             new Permiso("VISITAS_CREAR", "Crear Solicitudes de Visita"),
             new Permiso("VISITAS_APROBAR", "Aprobar o Rechazar Visitas"),
             new Permiso("VISITAS_CONSULTAR", "Consultar Historial de Visitas"),
+            new Permiso("VISITAS_ANULAR", "Anular Solicitudes de Visita"),
+            new Permiso("VISITAS_REASIGNAR", "Reasignar Anfitrión de Visitas"),
             new Permiso("ACCESO_CHECKIN", "Registrar Ingreso de Personas"),
             new Permiso("ACCESO_CHECKOUT", "Registrar Salida de Personas"),
             new Permiso("ACCESO_MONITOREAR", "Monitorear Accesos en Vivo"),
             new Permiso("AUDITORIA_CONSULTAR", "Consultar Bitácora de Auditoría"),
-            new Permiso("REPORTES_GENERAR", "Generar Reportes del Sistema")
+            new Permiso("REPORTES_GENERAR", "Generar Reportes del Sistema"),
+            new Permiso("REPORTES_EXPORTAR", "Exportar Reportes a CSV / TXT"),
+            new Permiso("PERSONAS_BLOQUEAR", "Bloquear Personas a Lista Negra"),
+            new Permiso("SISTEMA_EVACUACION", "Activar Protocolo de Evacuación Global")
     )),
 
     GUARDIA_SEGURIDAD("Guardia de Seguridad / Control Físico", Set.of(
@@ -37,7 +46,8 @@ public enum Rol {
             new Permiso("ACCESO_CHECKIN", "Registrar Ingreso de Personas"),
             new Permiso("ACCESO_CHECKOUT", "Registrar Salida de Personas"),
             new Permiso("ACCESO_MONITOREAR", "Monitorear Accesos en Vivo"),
-            new Permiso("ALERTAS_GESTIONAR", "Gestionar Alertas de Seguridad")
+            new Permiso("ALERTAS_GESTIONAR", "Gestionar Alertas de Seguridad"),
+            new Permiso("REPORTES_EXPORTAR", "Exportar Listado de Evacuación")
     )),
 
     RECEPCIONISTA("Recepcionista de Acceso", Set.of(
@@ -57,7 +67,8 @@ public enum Rol {
             new Permiso("AUDITORIA_CONSULTAR", "Consultar Bitácora de Auditoría"),
             new Permiso("VISITAS_CONSULTAR", "Consultar Historial de Visitas"),
             new Permiso("ACCESO_MONITOREAR", "Monitorear Accesos en Vivo"),
-            new Permiso("REPORTES_GENERAR", "Generar Reportes del Sistema")
+            new Permiso("REPORTES_GENERAR", "Generar Reportes del Sistema"),
+            new Permiso("REPORTES_EXPORTAR", "Exportar Reportes y Bitácora")
     ));
 
     private final String nombreLegible;

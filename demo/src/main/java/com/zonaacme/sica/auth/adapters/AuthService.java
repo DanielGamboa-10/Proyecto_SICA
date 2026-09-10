@@ -85,6 +85,7 @@ public class AuthService implements AuthUseCase {
         boolean passwordValida = PasswordHasher.verificar(password, usuario.getSalt(), usuario.getPasswordHash());
 
         if (!passwordValida) {
+            // KEY_BLOQUEO_LOGIN: Registro de intento fallido y bloqueo automático tras alcanzar el umbral (default: 3)
             boolean provocoBloqueo = usuario.registrarIntentoFallido(maxIntentos, minutosBloqueo);
             usuarioRepository.save(usuario);
 

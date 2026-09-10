@@ -55,6 +55,15 @@ public class ControlAccesoService implements ControlAccesoUseCase {
     public RegistroAcceso registrarIngreso(String personaId, String puntoControlId, String tokenGuardia) {
         authUseCase.validarPermiso(tokenGuardia, "ACCESO_CHECKIN", "REGISTRAR_INGRESO");
 
+        // ============================================================================
+        // PALABRA CLAVE DE BÚSQUEDA EXAMEN: KEY_MODO_EVACUACION
+        // FUNCIONALIDAD #11: Botón de Emergencia / Modo Evacuación Global
+        // ============================================================================
+        if (com.zonaacme.sica.core.services.GestorEvacuacionEmergencia.getInstance().isModoEvacuacionActivo()) {
+            return registrarFallo(personaId, puntoControlId, "ZONA_EMERGENCIA", TipoAcceso.ENTRADA,
+                    ResultadoAcceso.DENEGADO_EVACUACION_EMERGENCIA, "Ingreso bloqueado por protocolo de emergencia/evacuación activo.");
+        }
+
         Optional<Persona> personaOpt = personaRepository.findById(personaId);
         if (personaOpt.isEmpty() || !personaOpt.get().isActivo()) {
             return registrarFallo(personaId, puntoControlId, "ZONA_DESCONOCIDA", TipoAcceso.ENTRADA,
@@ -80,6 +89,22 @@ public class ControlAccesoService implements ControlAccesoUseCase {
         if (!zona.esHorarioPermitido(LocalTime.now())) {
             return registrarFallo(personaId, puntoControlId, zona.getId(), TipoAcceso.ENTRADA,
                     ResultadoAcceso.DENEGADO_FUERA_DE_HORARIO, "Intento de ingreso fuera del horario operativo de la zona.");
+        }
+
+        // ============================================================================
+        // PALABRA CLAVE DE BÚSQUEDA EXAMEN: KEY_AFORO_MAXIMO
+        // FUNCIONALIDAD #2: Control de Aforo Máximo Simultáneo
+        // ============================================================================
+        long ocupacionActualZona = visitaRepository.findAll().stream()
+                .filter(v -> v.getEstado() == EstadoVisita.EN_CURSO)
+                .filter(v -> v.getZonasAutorizadasIds().contains(zona.getId()))
+                .count();
+
+        // Límite de aforo de zona (ej: si la zona tiene configurada capacidad o umbral estándar 100)
+        int aforoMaximoPermitido = 100;
+        if (ocupacionActualZona >= aforoMaximoPermitido) {
+            return registrarFallo(personaId, puntoControlId, zona.getId(), TipoAcceso.ENTRADA,
+                    ResultadoAcceso.DENEGADO_AFORO_MAXIMO, "Aforo máximo alcanzado en la zona (" + ocupacionActualZona + "/" + aforoMaximoPermitido + ").");
         }
 
         String visitaIdAsociada = null;

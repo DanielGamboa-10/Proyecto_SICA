@@ -125,66 +125,102 @@ public class IncidentesPanel extends JPanel {
 
         // --- FORMULARIO NUEVO INCIDENTE ---
         JPanel formCard = ThemeConstants.createCard();
-        formCard.setLayout(new BorderLayout(10, 10));
-        formCard.setBorder(new EmptyBorder(15, 15, 15, 15));
-        formCard.setPreferredSize(new Dimension(430, 0));
+        formCard.setLayout(new BorderLayout(10, 12));
+        formCard.setBorder(new EmptyBorder(18, 18, 18, 18));
+        formCard.setPreferredSize(new Dimension(440, 0));
 
         JLabel lblFormTitle = new JLabel("Registrar Nuevo Incidente");
         lblFormTitle.setFont(ThemeConstants.FONT_SUBTITLE);
         lblFormTitle.setForeground(ThemeConstants.TEXT_PRIMARY);
         formCard.add(lblFormTitle, BorderLayout.NORTH);
 
-        JPanel formFields = new JPanel(new GridLayout(10, 1, 0, 5));
-        formFields.setOpaque(false);
+        JPanel formCenter = new JPanel();
+        formCenter.setLayout(new BoxLayout(formCenter, BoxLayout.Y_AXIS));
+        formCenter.setOpaque(false);
 
-        formFields.add(ThemeConstants.createLabel("Persona Involucrada:"));
+        // 1. Persona
+        JLabel lblPer = ThemeConstants.createLabel("Persona Involucrada:");
+        lblPer.setAlignmentX(Component.LEFT_ALIGNMENT);
         cmbPersonas = new JComboBox<>();
         ThemeConstants.styleComboBox(cmbPersonas);
-        formFields.add(cmbPersonas);
+        cmbPersonas.setAlignmentX(Component.LEFT_ALIGNMENT);
+        cmbPersonas.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
 
-        formFields.add(ThemeConstants.createLabel("Nivel de Gravedad:"));
+        // 2. Gravedad
+        JLabel lblGrav = ThemeConstants.createLabel("Nivel de Gravedad:");
+        lblGrav.setAlignmentX(Component.LEFT_ALIGNMENT);
         cmbGravedad = new JComboBox<>(Incidente.NivelGravedad.values());
         ThemeConstants.styleComboBox(cmbGravedad);
+        cmbGravedad.setAlignmentX(Component.LEFT_ALIGNMENT);
+        cmbGravedad.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
         cmbGravedad.addActionListener(e -> {
             Incidente.NivelGravedad g = (Incidente.NivelGravedad) cmbGravedad.getSelectedItem();
             if (g == Incidente.NivelGravedad.GRAVE || g == Incidente.NivelGravedad.CRITICO) {
                 chkBloquear.setSelected(true);
             }
         });
-        formFields.add(cmbGravedad);
 
-        formFields.add(ThemeConstants.createLabel("Acciones Tomadas:"));
+        // 3. Acciones
+        JLabel lblAcc = ThemeConstants.createLabel("Acciones Tomadas:");
+        lblAcc.setAlignmentX(Component.LEFT_ALIGNMENT);
         txtAcciones = ThemeConstants.createTextField();
-        txtAcciones.setText("Retención preventiva y verificación de seguridad");
-        formFields.add(txtAcciones);
+        txtAcciones.setText("Retención preventiva y verificación");
+        txtAcciones.setAlignmentX(Component.LEFT_ALIGNMENT);
+        txtAcciones.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
 
-        chkBloquear = new JCheckBox("Bloquear acceso preventivamente a la persona", false);
+        // 4. Checkbox Bloqueo
+        chkBloquear = new JCheckBox("Bloquear acceso preventivamente (Lista Negra)", true);
         chkBloquear.setOpaque(false);
         chkBloquear.setForeground(ThemeConstants.ACCENT_DANGER);
         chkBloquear.setFont(ThemeConstants.FONT_BODY_BOLD);
-        formFields.add(chkBloquear);
+        chkBloquear.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        formFields.add(ThemeConstants.createLabel("Descripción de los Hechos:"));
+        // 5. Descripción
+        JLabel lblDesc = ThemeConstants.createLabel("Descripción de los Hechos:");
+        lblDesc.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         txtDescripcion = new JTextArea(4, 20);
+        txtDescripcion.setText("Intento de acceso forzado a zona restringida o alteración del orden.");
         txtDescripcion.setBackground(ThemeConstants.BG_INPUT);
         txtDescripcion.setForeground(ThemeConstants.TEXT_PRIMARY);
         txtDescripcion.setCaretColor(Color.WHITE);
+        txtDescripcion.setFont(ThemeConstants.FONT_BODY);
         txtDescripcion.setLineWrap(true);
         txtDescripcion.setWrapStyleWord(true);
         txtDescripcion.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(ThemeConstants.BORDER_COLOR),
-                new EmptyBorder(6, 8, 6, 8)
+                new EmptyBorder(8, 10, 8, 10)
         ));
 
-        JPanel formCenter = new JPanel(new BorderLayout(0, 5));
-        formCenter.setOpaque(false);
-        formCenter.add(formFields, BorderLayout.NORTH);
-        formCenter.add(ThemeConstants.createScrollPane(txtDescripcion), BorderLayout.CENTER);
+        JScrollPane scrollDesc = ThemeConstants.createScrollPane(txtDescripcion);
+        scrollDesc.setAlignmentX(Component.LEFT_ALIGNMENT);
+        scrollDesc.setPreferredSize(new Dimension(Integer.MAX_VALUE, 95));
+        scrollDesc.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
+
+        formCenter.add(lblPer);
+        formCenter.add(Box.createRigidArea(new Dimension(0, 4)));
+        formCenter.add(cmbPersonas);
+        formCenter.add(Box.createRigidArea(new Dimension(0, 10)));
+        formCenter.add(lblGrav);
+        formCenter.add(Box.createRigidArea(new Dimension(0, 4)));
+        formCenter.add(cmbGravedad);
+        formCenter.add(Box.createRigidArea(new Dimension(0, 10)));
+        formCenter.add(lblAcc);
+        formCenter.add(Box.createRigidArea(new Dimension(0, 4)));
+        formCenter.add(txtAcciones);
+        formCenter.add(Box.createRigidArea(new Dimension(0, 10)));
+        formCenter.add(chkBloquear);
+        formCenter.add(Box.createRigidArea(new Dimension(0, 10)));
+        formCenter.add(lblDesc);
+        formCenter.add(Box.createRigidArea(new Dimension(0, 4)));
+        formCenter.add(scrollDesc);
+        formCenter.add(Box.createVerticalGlue());
 
         formCard.add(formCenter, BorderLayout.CENTER);
 
         btnRegistrar = ThemeConstants.createGradientButton("Registrar y Aplicar Protocolo",
                 ThemeConstants.ACCENT_DANGER, new Color(185, 28, 28), Color.WHITE);
+        btnRegistrar.setPreferredSize(new Dimension(0, 44));
         btnRegistrar.addActionListener(e -> registrarIncidente());
         formCard.add(btnRegistrar, BorderLayout.SOUTH);
 
@@ -195,18 +231,30 @@ public class IncidentesPanel extends JPanel {
         tableCard.setLayout(new BorderLayout(10, 10));
         tableCard.setBorder(new EmptyBorder(15, 15, 15, 15));
 
-        JPanel tableHeader = new JPanel(new BorderLayout());
+        JPanel tableHeader = new JPanel(new BorderLayout(10, 10));
         tableHeader.setOpaque(false);
         JLabel lblTabTitle = new JLabel("Historial de Incidentes y Sanciones");
         lblTabTitle.setFont(ThemeConstants.FONT_SUBTITLE);
         lblTabTitle.setForeground(ThemeConstants.TEXT_PRIMARY);
         tableHeader.add(lblTabTitle, BorderLayout.WEST);
 
+        // KEY_BUSCADOR_REALTIME: Buscador en tiempo real de incidentes
+        JPanel searchAndActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        searchAndActions.setOpaque(false);
+
+        JLabel lblBuscar = ThemeConstants.createLabel("Buscar:");
+        JTextField txtBuscar = ThemeConstants.createTextField("Filtrar incidentes...");
+        txtBuscar.setPreferredSize(new Dimension(180, 36));
+
         btnDesbloquear = ThemeConstants.createButton("Desbloquear Persona",
                 new Color(16, 185, 129), Color.WHITE);
         btnDesbloquear.addActionListener(e -> desbloquearPersonaSeleccionada());
-        tableHeader.add(btnDesbloquear, BorderLayout.EAST);
 
+        searchAndActions.add(lblBuscar);
+        searchAndActions.add(txtBuscar);
+        searchAndActions.add(btnDesbloquear);
+
+        tableHeader.add(searchAndActions, BorderLayout.EAST);
         tableCard.add(tableHeader, BorderLayout.NORTH);
 
         String[] columns = {"ID", "Fecha", "Persona", "Nivel", "Descripción", "Acciones", "Bloqueo", "Reportado Por"};
@@ -220,6 +268,9 @@ public class IncidentesPanel extends JPanel {
         incidentesTable = new JTable(tableModel);
         ThemeConstants.styleTable(incidentesTable);
         incidentesTable.getColumnModel().getColumn(3).setCellRenderer(new GravedadCellRenderer());
+
+        // KEY_BUSCADOR_REALTIME: Instalación del buscador dinámico
+        ThemeConstants.instalarBuscadorDinamico(txtBuscar, incidentesTable);
 
         tableCard.add(ThemeConstants.createScrollPane(incidentesTable), BorderLayout.CENTER);
 
@@ -316,7 +367,7 @@ public class IncidentesPanel extends JPanel {
         String personaId = persona != null ? persona.getId() : null;
         String personaNombre = persona != null ? persona.getNombreCompleto() : personaItem;
 
-        // Si se bloquea, desactivar persona y persistir
+        // KEY_LISTA_NEGRA: Si se bloquea (por gravedad o manual), desactivar persona en el repositorio
         if (bloquear && persona != null) {
             persona.desactivar();
             personaRepository.save(persona);
@@ -365,17 +416,18 @@ public class IncidentesPanel extends JPanel {
 
         JOptionPane.showMessageDialog(this,
                 "✅ Incidente registrado con éxito.\n" +
-                (bloquear ? "🚫 La persona ha sido BLOQUEADA automáticamente de todos los puntos de acceso." : ""),
+                (bloquear ? "🚫 La persona ha sido BLOQUEADA (Lista Negra) de todos los puntos de acceso." : ""),
                 "Incidente Registrado",
                 JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void desbloquearPersonaSeleccionada() {
-        int row = incidentesTable.getSelectedRow();
-        if (row < 0) {
+        int viewRow = incidentesTable.getSelectedRow();
+        if (viewRow < 0) {
             JOptionPane.showMessageDialog(this, "Seleccione un incidente en la tabla para desbloquear a la persona.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
+        int row = incidentesTable.convertRowIndexToModel(viewRow);
 
         String personaNombre = (String) tableModel.getValueAt(row, 2);
         Persona persona = personaRepository.findAll().stream()
@@ -388,6 +440,7 @@ public class IncidentesPanel extends JPanel {
             return;
         }
 
+        // KEY_LISTA_NEGRA: Reactivación / desbloqueo de persona
         persona.activar();
         personaRepository.save(persona);
 

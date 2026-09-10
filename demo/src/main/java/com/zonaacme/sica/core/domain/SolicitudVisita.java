@@ -22,7 +22,7 @@ public class SolicitudVisita {
 
     private final String id;
     private final String visitanteId;
-    private final String anfitrionId;
+    private String anfitrionId;
     private final String motivo;
     private final LocalDateTime fechaHoraInicio;
     private final LocalDateTime fechaHoraFin;
@@ -136,6 +136,14 @@ public class SolicitudVisita {
 
     public String getAnfitrionId() {
         return anfitrionId;
+    }
+
+    public void setAnfitrionId(String anfitrionId) {
+        this.anfitrionId = Objects.requireNonNull(anfitrionId, "Anfitrión ID no puede ser nulo");
+    }
+
+    public void reasignarAnfitrion(String nuevoAnfitrionId) {
+        setAnfitrionId(nuevoAnfitrionId);
     }
 
     public String getMotivo() {

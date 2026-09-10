@@ -117,8 +117,12 @@ public class MainDashboardFrame extends JFrame {
                 int w = getWidth();
                 int h = getHeight();
 
-                // Fondo negro obsidiana a púrpura profundo
-                GradientPaint gp = new GradientPaint(0, 0, ThemeConstants.BG_HEADER, w, 0, new Color(24, 14, 46));
+                boolean light = ThemeConstants.isLightMode;
+
+                // Fondo dinámico (Blanco puro/lavanda en claro, negro obsidiana en oscuro)
+                GradientPaint gp = light
+                        ? new GradientPaint(0, 0, new Color(255, 255, 255), w, 0, new Color(245, 243, 255))
+                        : new GradientPaint(0, 0, ThemeConstants.BG_HEADER, w, 0, new Color(24, 14, 46));
                 g2.setPaint(gp);
                 g2.fillRect(0, 0, w, h);
 
@@ -126,7 +130,7 @@ public class MainDashboardFrame extends JFrame {
                 int beam1X = (int) (w * (0.5f + 0.45f * Math.sin(animPhase)));
                 GradientPaint beam1 = new GradientPaint(
                         beam1X - 180, h - 2, new Color(147, 51, 234, 0),
-                        beam1X, h - 2, new Color(217, 70, 239, 240),
+                        beam1X, h - 2, new Color(217, 70, 239, light ? 180 : 240),
                         true
                 );
                 g2.setPaint(beam1);
@@ -136,7 +140,7 @@ public class MainDashboardFrame extends JFrame {
                 int beam2X = (int) (w * (0.5f - 0.45f * Math.cos(animPhase * 0.9)));
                 GradientPaint beam2 = new GradientPaint(
                         beam2X - 120, h - 2, new Color(56, 189, 248, 0),
-                        beam2X, h - 2, new Color(56, 189, 248, 190),
+                        beam2X, h - 2, new Color(56, 189, 248, light ? 140 : 190),
                         true
                 );
                 g2.setPaint(beam2);
@@ -270,8 +274,8 @@ public class MainDashboardFrame extends JFrame {
             }
         };
         statusPill.setOpaque(false);
-        JLabel statusDot = new JLabel("●");
-        statusDot.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        JLabel statusDot = new JLabel("•");
+        statusDot.setFont(new Font("Segoe UI", Font.BOLD, 14));
         statusDot.setForeground(ThemeConstants.ACCENT_SUCCESS);
         JLabel statusText = new JLabel("MYSQL LIVE");
         statusText.setFont(new Font("Segoe UI", Font.BOLD, 11));
@@ -295,11 +299,12 @@ public class MainDashboardFrame extends JFrame {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(30, 20, 55, 200));
+                boolean light = ThemeConstants.isLightMode;
+                g2.setColor(light ? new Color(241, 245, 249) : new Color(30, 20, 55, 200));
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 14, 14);
 
                 int borderAlpha = (int) (120 + 80 * Math.sin(userPulse));
-                g2.setColor(new Color(147, 51, 234, Math.min(255, borderAlpha)));
+                g2.setColor(light ? new Color(196, 181, 253, Math.min(255, borderAlpha)) : new Color(147, 51, 234, Math.min(255, borderAlpha)));
                 g2.setStroke(new BasicStroke(1.2f));
                 g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 14, 14);
                 g2.dispose();
@@ -309,10 +314,6 @@ public class MainDashboardFrame extends JFrame {
         userBadgeCard.setOpaque(false);
         userBadgeCard.setBorder(new EmptyBorder(2, 10, 2, 10));
 
-        JLabel userIcon = new JLabel("👤");
-        userIcon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 13));
-        userIcon.setForeground(ThemeConstants.TEXT_SECONDARY);
-
         JLabel userNameLabel = new JLabel(sesionUsuario.getUsername());
         userNameLabel.setFont(ThemeConstants.FONT_BODY_BOLD);
         userNameLabel.setForeground(ThemeConstants.TEXT_PRIMARY);
@@ -321,10 +322,78 @@ public class MainDashboardFrame extends JFrame {
         roleChip.setFont(new Font("Segoe UI", Font.BOLD, 10));
         roleChip.setForeground(ThemeConstants.ACCENT_CYAN);
 
-        userBadgeCard.add(userIcon);
         userBadgeCard.add(userNameLabel);
         userBadgeCard.add(new JLabel("•"));
         userBadgeCard.add(roleChip);
+
+        // KEY_MODO_EVACUACION: Botón de emergencia global / Evacuación
+        JButton btnEvacuacion = ThemeConstants.createGradientButton(
+                com.zonaacme.sica.core.services.GestorEvacuacionEmergencia.getInstance().isModoEvacuacionActivo()
+                        ? "EVACUACION ACTIVA" : "EMERGENCIA",
+                new Color(220, 38, 38),
+                new Color(153, 27, 27),
+                Color.WHITE
+        );
+        btnEvacuacion.addActionListener(e -> {
+            com.zonaacme.sica.core.services.GestorEvacuacionEmergencia gestor =
+                    com.zonaacme.sica.core.services.GestorEvacuacionEmergencia.getInstance();
+            if (!gestor.isModoEvacuacionActivo()) {
+                int res = JOptionPane.showConfirmDialog(
+                        this,
+                        "ATENCION: Desea ACTIVAR el MODO DE EVACUACION DE EMERGENCIA GLOBAL?\n\n" +
+                        "• Todos los torniquetes habilitarán salida libre de inmediato.\n" +
+                        "• Se denegarán e interrumpirán automáticamente todos los ingresos.\n" +
+                        "• Se notificará a los cuerpos de seguridad.",
+                        "CONFIRMAR PROTOCOLO DE EMERGENCIA",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.ERROR_MESSAGE
+                );
+                if (res == JOptionPane.YES_OPTION) {
+                    gestor.activarModoEvacuacion(sesionUsuario != null ? sesionUsuario.getUsername() : "seguridad");
+                    btnEvacuacion.setText("EVACUACION ACTIVA");
+                    auditRepo.save(com.zonaacme.sica.audit.domain.BitacoraAuditoria.crear(
+                            sesionUsuario != null ? sesionUsuario.getUsername() : "seguridad",
+                            "ACTIVACION_MODO_EVACUACION",
+                            "sistema",
+                            "MODO DE EVACUACION ACTIVADO POR BOTON DE PANICO GLOBAL",
+                            "DASHBOARD_HEADER"
+                    ));
+                    JOptionPane.showMessageDialog(this, "MODO DE EVACUACION ACTIVADO SATISFACTORIAMENTE.\nSalidas liberadas.", "Emergencia SICA", JOptionPane.WARNING_MESSAGE);
+                }
+            } else {
+                int res = JOptionPane.showConfirmDialog(
+                        this,
+                        "Desea DESACTIVAR el Modo de Evacuacion y restablecer la operacion normal del complejo?",
+                        "Restablecer Operaciones Normales",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE
+                );
+                if (res == JOptionPane.YES_OPTION) {
+                    gestor.desactivarModoEvacuacion();
+                    btnEvacuacion.setText("EMERGENCIA");
+                    auditRepo.save(com.zonaacme.sica.audit.domain.BitacoraAuditoria.crear(
+                            sesionUsuario != null ? sesionUsuario.getUsername() : "seguridad",
+                            "DESACTIVACION_MODO_EVACUACION",
+                            "sistema",
+                            "MODO DE EVACUACION DESACTIVADO. OPERACION NORMAL RESTABLECIDA.",
+                            "DASHBOARD_HEADER"
+                    ));
+                    JOptionPane.showMessageDialog(this, "Protocolo de emergencia cancelado. Operacion normal restablecida.", "SICA Normal", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+
+        JButton btnThemeToggle = ThemeConstants.createGradientButton(
+                ThemeConstants.isLightMode ? "Modo Oscuro" : "Modo Claro",
+                ThemeConstants.isLightMode ? new Color(79, 70, 229) : new Color(147, 51, 234),
+                ThemeConstants.isLightMode ? new Color(67, 56, 202) : new Color(109, 40, 217),
+                Color.WHITE
+        );
+        btnThemeToggle.addActionListener(e -> {
+            ThemeConstants.setLightMode(!ThemeConstants.isLightMode);
+            btnThemeToggle.setText(ThemeConstants.isLightMode ? "Modo Oscuro" : "Modo Claro");
+            actualizarTemaCompleto(titleLabel, subtitleLabel, userNameLabel, null, btnThemeToggle);
+        });
 
         JButton btnLogout = ThemeConstants.createGradientButton(
                 "Cerrar Sesión",
@@ -345,6 +414,8 @@ public class MainDashboardFrame extends JFrame {
             });
         });
 
+        userPanel.add(btnThemeToggle);
+        userPanel.add(btnEvacuacion);
         userPanel.add(statusPill);
         userPanel.add(userBadgeCard);
         userPanel.add(btnLogout);
@@ -353,12 +424,15 @@ public class MainDashboardFrame extends JFrame {
         header.add(userPanel, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
 
-        // Sidebar Izquierda con gradiente negro obsidiana a púrpura noche
+        // Sidebar Izquierda con gradiente dinámico según el tema
         JPanel sidebar = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
-                GradientPaint gp = new GradientPaint(0, 0, ThemeConstants.BG_SIDEBAR, 0, getHeight(), new Color(8, 6, 16));
+                boolean light = ThemeConstants.isLightMode;
+                GradientPaint gp = light
+                        ? new GradientPaint(0, 0, new Color(255, 255, 255), 0, getHeight(), new Color(245, 247, 250))
+                        : new GradientPaint(0, 0, ThemeConstants.BG_SIDEBAR, 0, getHeight(), new Color(8, 6, 16));
                 g2.setPaint(gp);
                 g2.fillRect(0, 0, getWidth(), getHeight());
                 g2.setColor(ThemeConstants.BORDER_COLOR);
@@ -410,66 +484,66 @@ public class MainDashboardFrame extends JFrame {
         cardPanel.add(notificacionesPanel, "NOTIFICACIONES");
         cardPanel.add(hilosConcurrenciaPanel, "HILOS");
 
-        // 🛡️ REGLAS ESTRICTAS DE CONTROL DE ACCESO BASADO EN ROLES (RBAC):
+        // REGLAS ESTRICTAS DE CONTROL DE ACCESO BASADO EN ROLES (RBAC):
         Rol rol = sesionUsuario.getRol();
         String primerCard = "DASHBOARD";
 
         // 1. Superusuario / Administrador (Acceso 100% Completo)
         if (rol == Rol.ADMINISTRADOR) {
             primerCard = "DASHBOARD";
-            sidebar.add(crearNavButton("❖  Vista General", "DASHBOARD", true));
+            sidebar.add(crearNavButton("Vista General", "DASHBOARD", true));
             sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
-            sidebar.add(crearNavButton("⚡  Control de Accesos", "CONTROL_ACCESO", false));
+            sidebar.add(crearNavButton("Control de Accesos", "CONTROL_ACCESO", false));
             sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
-            sidebar.add(crearNavButton("👥  Gestión de Visitas", "VISITAS", false));
+            sidebar.add(crearNavButton("Gestion de Visitas", "VISITAS", false));
             sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
-            sidebar.add(crearNavButton("🏢  Personas y Zonas", "PERSONAS_ZONAS", false));
+            sidebar.add(crearNavButton("Personas y Zonas", "PERSONAS_ZONAS", false));
             sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
-            sidebar.add(crearNavButton("🛡  Incidentes y Bloqueos", "INCIDENTES", false));
+            sidebar.add(crearNavButton("Incidentes y Bloqueos", "INCIDENTES", false));
             sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
-            sidebar.add(crearNavButton("📊  Analítica y Reportes", "REPORTES", false));
+            sidebar.add(crearNavButton("Analitica y Reportes", "REPORTES", false));
             sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
-            sidebar.add(crearNavButton("📋  Bitácora Auditoría", "AUDITORIA", false));
+            sidebar.add(crearNavButton("Bitacora Auditoria", "AUDITORIA", false));
             sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
-            sidebar.add(crearNavButton("🔔  Centro de Alertas", "NOTIFICACIONES", false));
+            sidebar.add(crearNavButton("Centro de Alertas", "NOTIFICACIONES", false));
 
         // 2. Supervisor / Auditor
         } else if (rol == Rol.AUDITOR) {
             primerCard = "DASHBOARD";
-            sidebar.add(crearNavButton("❖  Vista General", "DASHBOARD", true));
+            sidebar.add(crearNavButton("Vista General", "DASHBOARD", true));
             sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
-            sidebar.add(crearNavButton("📊  Analítica y Reportes", "REPORTES", false));
+            sidebar.add(crearNavButton("Analitica y Reportes", "REPORTES", false));
             sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
-            sidebar.add(crearNavButton("🛡  Incidentes y Bloqueos", "INCIDENTES", false));
+            sidebar.add(crearNavButton("Incidentes y Bloqueos", "INCIDENTES", false));
             sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
-            sidebar.add(crearNavButton("📋  Bitácora Auditoría", "AUDITORIA", false));
+            sidebar.add(crearNavButton("Bitacora Auditoria", "AUDITORIA", false));
             sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
-            sidebar.add(crearNavButton("🔔  Centro de Alertas", "NOTIFICACIONES", false));
+            sidebar.add(crearNavButton("Centro de Alertas", "NOTIFICACIONES", false));
 
         // 3. Guarda de Seguridad
         } else if (rol == Rol.GUARDIA_SEGURIDAD) {
             primerCard = "CONTROL_ACCESO";
-            sidebar.add(crearNavButton("⚡  Control de Accesos", "CONTROL_ACCESO", true));
+            sidebar.add(crearNavButton("Control de Accesos", "CONTROL_ACCESO", true));
             sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
-            sidebar.add(crearNavButton("🎫  Check-In de Visitas", "VISITAS", false));
+            sidebar.add(crearNavButton("Check-In de Visitas", "VISITAS", false));
             sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
-            sidebar.add(crearNavButton("🛡  Incidentes y Bloqueos", "INCIDENTES", false));
+            sidebar.add(crearNavButton("Incidentes y Bloqueos", "INCIDENTES", false));
             sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
-            sidebar.add(crearNavButton("🔔  Centro de Alertas", "NOTIFICACIONES", false));
+            sidebar.add(crearNavButton("Centro de Alertas", "NOTIFICACIONES", false));
 
         // 4. Funcionario de Empresa (Anfitrión)
         } else if (rol == Rol.ANFITRION_EMPLEADO) {
             primerCard = "VISITAS";
-            sidebar.add(crearNavButton("📝  Solicitudes de Visita", "VISITAS", true));
+            sidebar.add(crearNavButton("Solicitudes de Visita", "VISITAS", true));
 
         // 5. Recepcionista
         } else {
             primerCard = "CONTROL_ACCESO";
-            sidebar.add(crearNavButton("⚡  Control de Accesos", "CONTROL_ACCESO", true));
+            sidebar.add(crearNavButton("Control de Accesos", "CONTROL_ACCESO", true));
             sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
-            sidebar.add(crearNavButton("👥  Gestión de Visitas", "VISITAS", false));
+            sidebar.add(crearNavButton("Gestion de Visitas", "VISITAS", false));
             sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
-            sidebar.add(crearNavButton("🛡  Incidentes y Bloqueos", "INCIDENTES", false));
+            sidebar.add(crearNavButton("Incidentes y Bloqueos", "INCIDENTES", false));
         }
 
         sidebar.add(Box.createVerticalGlue());
@@ -480,9 +554,10 @@ public class MainDashboardFrame extends JFrame {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(20, 14, 38));
+                boolean light = ThemeConstants.isLightMode;
+                g2.setColor(light ? new Color(245, 247, 250) : new Color(20, 14, 38));
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
-                g2.setColor(new Color(147, 51, 234, 90));
+                g2.setColor(light ? new Color(226, 232, 240) : new Color(147, 51, 234, 90));
                 g2.setStroke(new BasicStroke(1.0f));
                 g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
                 g2.dispose();
@@ -514,6 +589,34 @@ public class MainDashboardFrame extends JFrame {
         add(cardPanel, BorderLayout.CENTER);
 
         cardLayout.show(cardPanel, primerCard);
+    }
+
+    private void actualizarTemaCompleto(JLabel titleLabel, JLabel subtitleLabel, JLabel userNameLabel, JLabel userIcon, JButton btnThemeToggle) {
+        getContentPane().setBackground(ThemeConstants.BG_DARK);
+        cardPanel.setBackground(ThemeConstants.BG_DARK);
+
+        if (titleLabel != null) titleLabel.setForeground(ThemeConstants.TEXT_PRIMARY);
+        if (subtitleLabel != null) subtitleLabel.setForeground(ThemeConstants.isLightMode ? new Color(124, 58, 237) : ThemeConstants.ACCENT_PURPLE);
+        if (userNameLabel != null) userNameLabel.setForeground(ThemeConstants.TEXT_PRIMARY);
+        if (userIcon != null) userIcon.setForeground(ThemeConstants.isLightMode ? new Color(100, 116, 139) : ThemeConstants.TEXT_SECONDARY);
+        if (btnThemeToggle != null) btnThemeToggle.setForeground(ThemeConstants.TEXT_PRIMARY);
+
+        // Actualizar botones de navegación del sidebar
+        for (JButton b : sidebarButtons) {
+            boolean isActive = b.getBackground().equals(ThemeConstants.ACCENT_PRIMARY);
+            if (isActive) {
+                b.setForeground(Color.WHITE);
+                b.setBackground(ThemeConstants.ACCENT_PRIMARY);
+            } else {
+                b.setForeground(ThemeConstants.TEXT_SECONDARY);
+                b.setBackground(ThemeConstants.BG_SIDEBAR);
+            }
+        }
+
+        ThemeConstants.aplicarTemaRecursivo(this);
+
+        revalidate();
+        repaint();
     }
 
     private JButton crearNavButton(String label, String cardName, boolean active) {
@@ -558,7 +661,7 @@ public class MainDashboardFrame extends JFrame {
                     g2.setColor(Color.WHITE);
                     g2.fillOval(3, barY + 4, 3, 6);
                 } else if (getModel().isRollover()) {
-                    g2.setColor(ThemeConstants.BG_CARD_HOVER);
+                    g2.setColor(ThemeConstants.isLightMode ? new Color(243, 232, 255) : ThemeConstants.BG_CARD_HOVER);
                     g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 12, 12));
                     g2.setColor(new Color(168, 85, 247, 100));
                     g2.setStroke(new BasicStroke(1.0f));

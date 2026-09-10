@@ -11,32 +11,118 @@ public final class ThemeConstants {
 
     private ThemeConstants() {}
 
-    // Paleta de Colores Ultra-Elegante (Obsidian Jet Black & Royal Neon Violet)
-    public static final Color BG_DARK = new Color(9, 7, 18);              // Pure Deep Obsidian Black
-    public static final Color BG_SIDEBAR = new Color(13, 10, 25);         // Jet Amethyst Black
-    public static final Color BG_HEADER = new Color(18, 13, 34);          // Midnight Velvet Purple
-    public static final Color BG_CARD = new Color(22, 16, 42);            // Elevated Velvet Glass
-    public static final Color BG_CARD_HOVER = new Color(42, 26, 80);      // Purple Glow Hover
-    public static final Color BG_INPUT = new Color(12, 9, 24);            // Inset Dark Onyx
-    public static final Color BG_TABLE_HEADER = new Color(30, 20, 58);    // Royal Violet Header
-    public static final Color BG_TABLE_ROW_ALT = new Color(16, 12, 30);   // Alternating Onyx Row
+    public static boolean isLightMode = false;
+
+    // Paleta de Colores Dinámica (Soporta Modo Oscuro y Modo Claro)
+    public static Color BG_DARK = new Color(9, 7, 18);              // Pure Deep Obsidian Black
+    public static Color BG_SIDEBAR = new Color(13, 10, 25);         // Jet Amethyst Black
+    public static Color BG_HEADER = new Color(18, 13, 34);          // Midnight Velvet Purple
+    public static Color BG_CARD = new Color(22, 16, 42);            // Elevated Velvet Glass
+    public static Color BG_CARD_HOVER = new Color(42, 26, 80);      // Purple Glow Hover
+    public static Color BG_INPUT = new Color(12, 9, 24);            // Inset Dark Onyx
+    public static Color BG_TABLE_HEADER = new Color(30, 20, 58);    // Royal Violet Header
+    public static Color BG_TABLE_ROW_ALT = new Color(16, 12, 30);   // Alternating Onyx Row
 
     // Colores de Acento Vibrantes y Gradientes Neón
-    public static final Color ACCENT_PRIMARY = new Color(147, 51, 234);   // Electric Purple 600
-    public static final Color ACCENT_PURPLE = new Color(168, 85, 247);    // Neon Purple 500
-    public static final Color ACCENT_MAGENTA = new Color(217, 70, 239);   // Neon Fuchsia
-    public static final Color ACCENT_CYAN = new Color(56, 189, 248);      // Cyber Cyan
-    public static final Color ACCENT_SUCCESS = new Color(16, 185, 129);   // Emerald
-    public static final Color ACCENT_DANGER = new Color(244, 63, 94);     // Rose Neon
-    public static final Color ACCENT_WARNING = new Color(245, 158, 11);   // Amber Gold
-    public static final Color ACCENT_INFO = new Color(99, 102, 241);      // Indigo Neon
+    public static Color ACCENT_PRIMARY = new Color(147, 51, 234);   // Electric Purple 600
+    public static Color ACCENT_PURPLE = new Color(168, 85, 247);    // Neon Purple 500
+    public static Color ACCENT_MAGENTA = new Color(217, 70, 239);   // Neon Fuchsia
+    public static Color ACCENT_CYAN = new Color(56, 189, 248);      // Cyber Cyan
+    public static Color ACCENT_SUCCESS = new Color(16, 185, 129);   // Emerald
+    public static Color ACCENT_DANGER = new Color(244, 63, 94);     // Rose Neon
+    public static Color ACCENT_WARNING = new Color(245, 158, 11);   // Amber Gold
+    public static Color ACCENT_INFO = new Color(99, 102, 241);      // Indigo Neon
 
     // Textos
-    public static final Color TEXT_PRIMARY = new Color(250, 250, 255);    // Pure White
-    public static final Color TEXT_SECONDARY = new Color(216, 180, 254);  // Soft Lavender
-    public static final Color TEXT_MUTED = new Color(167, 139, 250);      // Muted Purple Slate
-    public static final Color BORDER_COLOR = new Color(92, 58, 158, 220); // Neon Violet Border
-    public static final Color BORDER_HIGHLIGHT = new Color(216, 180, 254, 200);
+    public static Color TEXT_PRIMARY = new Color(250, 250, 255);    // Pure White
+    public static Color TEXT_SECONDARY = new Color(216, 180, 254);  // Soft Lavender
+    public static Color TEXT_MUTED = new Color(167, 139, 250);      // Muted Purple Slate
+    public static Color BORDER_COLOR = new Color(92, 58, 158, 220); // Neon Violet Border
+    public static Color BORDER_HIGHLIGHT = new Color(216, 180, 254, 200);
+
+    /**
+     * Alterna la paleta entre Modo Oscuro (Obsidian Neon) y Modo Claro (Pearl Slate Moderno de Alto Contraste).
+     */
+    public static void setLightMode(boolean light) {
+        isLightMode = light;
+        if (light) {
+            BG_DARK = new Color(245, 247, 250);             // Clean Slate 50
+            BG_SIDEBAR = new Color(255, 255, 255);          // Pure White
+            BG_HEADER = new Color(255, 255, 255);           // Pure White
+            BG_CARD = new Color(255, 255, 255);             // Crisp Card White
+            BG_CARD_HOVER = new Color(243, 232, 255);       // Soft Purple Glow
+            BG_INPUT = new Color(255, 255, 255);            // White Input
+            BG_TABLE_HEADER = new Color(109, 40, 217);      // Deep Royal Purple 700
+            BG_TABLE_ROW_ALT = new Color(248, 250, 252);    // Very light slate alt row
+
+            TEXT_PRIMARY = new Color(15, 23, 42);           // Ultra Crisp Slate 900
+            TEXT_SECONDARY = new Color(51, 65, 85);         // High Contrast Slate 700
+            TEXT_MUTED = new Color(100, 116, 139);          // Slate 500
+            BORDER_COLOR = new Color(226, 232, 240);        // Slate 200
+            BORDER_HIGHLIGHT = new Color(147, 51, 234, 220);
+        } else {
+            BG_DARK = new Color(9, 7, 18);
+            BG_SIDEBAR = new Color(13, 10, 25);
+            BG_HEADER = new Color(18, 13, 34);
+            BG_CARD = new Color(22, 16, 42);
+            BG_CARD_HOVER = new Color(42, 26, 80);
+            BG_INPUT = new Color(12, 9, 24);
+            BG_TABLE_HEADER = new Color(30, 20, 58);
+            BG_TABLE_ROW_ALT = new Color(16, 12, 30);
+
+            TEXT_PRIMARY = new Color(250, 250, 255);
+            TEXT_SECONDARY = new Color(216, 180, 254);
+            TEXT_MUTED = new Color(167, 139, 250);
+            BORDER_COLOR = new Color(92, 58, 158, 220);
+            BORDER_HIGHLIGHT = new Color(216, 180, 254, 200);
+        }
+    }
+
+    /**
+     * Recorre recursivamente un contenedor Swing y sincroniza colores de fondo, tablas, textos y scrollpanes.
+     */
+    public static void aplicarTemaRecursivo(Component comp) {
+        if (comp == null) return;
+
+        if (comp instanceof JTable) {
+            styleTable((JTable) comp);
+        } else if (comp instanceof JScrollPane) {
+            styleScrollPane((JScrollPane) comp);
+        } else if (comp instanceof JTextField) {
+            JTextField tf = (JTextField) comp;
+            tf.setBackground(BG_INPUT);
+            tf.setForeground(TEXT_PRIMARY);
+            tf.setCaretColor(ACCENT_PURPLE);
+            tf.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(BORDER_COLOR, 1, true),
+                    new EmptyBorder(10, 12, 10, 12)
+            ));
+        } else if (comp instanceof JTextArea) {
+            comp.setBackground(BG_INPUT);
+            comp.setForeground(TEXT_PRIMARY);
+        } else if (comp instanceof JComboBox) {
+            styleComboBox((JComboBox<?>) comp);
+        } else if (comp instanceof JLabel) {
+            JLabel lbl = (JLabel) comp;
+            Color fg = lbl.getForeground();
+            if (fg != null && (fg.equals(ACCENT_SUCCESS) || fg.equals(ACCENT_DANGER) || fg.equals(ACCENT_WARNING) || fg.equals(ACCENT_CYAN) || fg.equals(Color.WHITE))) {
+                // conservar badge
+            } else {
+                lbl.setForeground(TEXT_PRIMARY);
+            }
+        } else if (comp instanceof JPanel) {
+            JPanel p = (JPanel) comp;
+            if (p.isOpaque()) {
+                p.setBackground(BG_DARK);
+            }
+        }
+
+        if (comp instanceof Container) {
+            for (Component child : ((Container) comp).getComponents()) {
+                aplicarTemaRecursivo(child);
+            }
+        }
+    }
 
     // Tipografías
     public static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, 24);
@@ -166,8 +252,9 @@ public final class ThemeConstants {
                 int w = getWidth();
                 int h = getHeight();
 
-                // Fondo de tarjeta con gradiente negro obsidiana a púrpura profundo
-                GradientPaint gp = new GradientPaint(0, 0, BG_CARD, 0, h, new Color(14, 10, 28));
+                // Fondo de tarjeta
+                Color bottomColor = isLightMode ? new Color(248, 250, 252) : new Color(14, 10, 28);
+                GradientPaint gp = new GradientPaint(0, 0, BG_CARD, 0, h, bottomColor);
                 g2.setPaint(gp);
                 g2.fill(new RoundRectangle2D.Float(0, 0, w, h, 18, 18));
 
@@ -175,15 +262,16 @@ public final class ThemeConstants {
                 int gleamX = (int) (w * (0.5f + 0.4f * Math.sin(pulse)));
                 GradientPaint topGleam = new GradientPaint(
                         gleamX - 60, 0, new Color(168, 85, 247, 0),
-                        gleamX, 0, new Color(217, 70, 239, 130),
+                        gleamX, 0, new Color(217, 70, 239, isLightMode ? 90 : 130),
                         true
                 );
                 g2.setPaint(topGleam);
                 g2.fillRect(0, 0, w, 2);
 
-                // Borde con resplandor púrpura elegante
+                // Borde con resplandor neón elegante
                 int bAlpha = (int) (140 + 40 * Math.sin(pulse));
-                g2.setColor(new Color(147, 51, 234, Math.min(255, bAlpha)));
+                Color bCol = isLightMode ? new Color(168, 85, 247, Math.min(255, bAlpha)) : new Color(147, 51, 234, Math.min(255, bAlpha));
+                g2.setColor(bCol);
                 g2.setStroke(new BasicStroke(1.4f));
                 g2.draw(new RoundRectangle2D.Float(0, 0, w - 1, h - 1, 18, 18));
 
@@ -268,9 +356,30 @@ public final class ThemeConstants {
         combo.setUI(new javax.swing.plaf.basic.BasicComboBoxUI() {
             @Override
             protected JButton createArrowButton() {
-                JButton btn = super.createArrowButton();
-                btn.setBackground(BG_TABLE_HEADER);
-                btn.setBorder(BorderFactory.createEmptyBorder());
+                JButton btn = new JButton() {
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2 = (Graphics2D) g.create();
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2.setColor(BG_INPUT);
+                        g2.fillRect(0, 0, getWidth(), getHeight());
+
+                        // Dibujar flecha chevron centrada y de color contrastante
+                        int cx = getWidth() / 2;
+                        int cy = getHeight() / 2;
+                        g2.setColor(isLightMode ? new Color(79, 70, 229) : ACCENT_PURPLE);
+                        g2.setStroke(new BasicStroke(2.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                        g2.drawLine(cx - 5, cy - 2, cx, cy + 3);
+                        g2.drawLine(cx, cy + 3, cx + 5, cy - 2);
+                        g2.dispose();
+                    }
+                };
+                btn.setContentAreaFilled(false);
+                btn.setBorderPainted(false);
+                btn.setFocusPainted(false);
+                btn.setOpaque(false);
+                btn.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 8));
+                btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
                 return btn;
             }
 
@@ -310,7 +419,7 @@ public final class ThemeConstants {
     public static void styleTable(JTable table) {
         table.setBackground(BG_CARD);
         table.setForeground(TEXT_PRIMARY);
-        table.setGridColor(new Color(56, 38, 96));
+        table.setGridColor(isLightMode ? new Color(226, 232, 240) : new Color(56, 38, 96));
         table.setFont(FONT_BODY);
         table.setRowHeight(42);
         table.setSelectionBackground(new Color(139, 92, 246, 170));
@@ -328,7 +437,7 @@ public final class ThemeConstants {
                 JLabel lbl = new JLabel(value != null ? value.toString().toUpperCase() : "", SwingConstants.CENTER);
                 lbl.setOpaque(true);
                 lbl.setBackground(BG_TABLE_HEADER);
-                lbl.setForeground(new Color(255, 255, 255));
+                lbl.setForeground(Color.WHITE);
                 lbl.setFont(new Font("Segoe UI", Font.BOLD, 13));
                 lbl.setBorder(BorderFactory.createCompoundBorder(
                         BorderFactory.createMatteBorder(0, 0, 2, 1, ACCENT_PURPLE),
@@ -346,23 +455,17 @@ public final class ThemeConstants {
                 lbl.setBorder(new EmptyBorder(4, 10, 4, 10));
 
                 String valStr = value != null ? value.toString() : "";
-                boolean isStatusColumn = valStr.equals("PERMITIDO") || valStr.equals("DENEGADO") ||
-                                         valStr.equals("APROBADA") || valStr.equals("RECHAZADA") ||
-                                         valStr.equals("PENDIENTE") || valStr.equals("EN_CURSO") ||
-                                         valStr.equals("FINALIZADA") || valStr.equals("ACTIVO") ||
-                                         valStr.equals("BLOQUEADO") || valStr.equals("CRITICO") ||
-                                         valStr.equals("GRAVE") || valStr.equals("MODERADO");
 
                 if (!isSelected) {
                     lbl.setBackground(row % 2 == 0 ? BG_CARD : BG_TABLE_ROW_ALT);
                     if (valStr.contains("PERMITIDO") || valStr.contains("ACTIVO") || valStr.contains("APROBADA") || valStr.contains("DENTRO") || valStr.contains("OPERATIVA")) {
-                        lbl.setForeground(new Color(52, 211, 153)); // Soft Emerald
+                        lbl.setForeground(isLightMode ? new Color(16, 185, 129) : new Color(52, 211, 153)); // Emerald
                         lbl.setFont(FONT_BODY_BOLD);
                     } else if (valStr.contains("DENEGADO") || valStr.contains("BLOQUEADO") || valStr.contains("RECHAZADA") || valStr.contains("ALERTA") || valStr.contains("CRITICO") || valStr.contains("GRAVE")) {
-                        lbl.setForeground(new Color(251, 113, 133)); // Soft Rose Crimson
+                        lbl.setForeground(isLightMode ? new Color(225, 29, 72) : new Color(251, 113, 133)); // Rose Crimson
                         lbl.setFont(FONT_BODY_BOLD);
                     } else if (valStr.contains("PENDIENTE") || valStr.contains("MODERADO")) {
-                        lbl.setForeground(new Color(251, 191, 36)); // Soft Amber
+                        lbl.setForeground(isLightMode ? new Color(217, 119, 6) : new Color(251, 191, 36)); // Amber
                         lbl.setFont(FONT_BODY_BOLD);
                     } else {
                         lbl.setForeground(TEXT_PRIMARY);
@@ -378,6 +481,39 @@ public final class ThemeConstants {
 
         for (int i = 0; i < table.getColumnCount(); i++) {
             table.getColumnModel().getColumn(i).setCellRenderer(cellRenderer);
+        }
+    }
+
+    /**
+     * KEY_BUSCADOR_REALTIME: Conecta un campo de búsqueda en vivo con un JTable mediante TableRowSorter y DocumentListener.
+     */
+    public static void instalarBuscadorDinamico(JTextField searchField, JTable table) {
+        if (table.getModel() instanceof javax.swing.table.TableModel) {
+            @SuppressWarnings("unchecked")
+            javax.swing.table.TableRowSorter<javax.swing.table.TableModel> sorter =
+                    new javax.swing.table.TableRowSorter<>(table.getModel());
+            table.setRowSorter(sorter);
+
+            searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+                private void filtrar() {
+                    String texto = searchField.getText().trim();
+                    if (texto.isEmpty()) {
+                        sorter.setRowFilter(null);
+                    } else {
+                        // Búsqueda regex no case-sensitive ("(?i)" + regex)
+                        sorter.setRowFilter(javax.swing.RowFilter.regexFilter("(?i)" + java.util.regex.Pattern.quote(texto)));
+                    }
+                }
+
+                @Override
+                public void insertUpdate(javax.swing.event.DocumentEvent e) { filtrar(); }
+
+                @Override
+                public void removeUpdate(javax.swing.event.DocumentEvent e) { filtrar(); }
+
+                @Override
+                public void changedUpdate(javax.swing.event.DocumentEvent e) { filtrar(); }
+            });
         }
     }
 }

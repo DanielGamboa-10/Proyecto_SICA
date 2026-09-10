@@ -86,10 +86,10 @@ public class DashboardPanel extends JPanel {
         lblAlertas = new JLabel("0", SwingConstants.LEFT);
         lblPersonasTotal = new JLabel("0", SwingConstants.LEFT);
 
-        statsPanel.add(crearModernStatCard("Visitas Activas", lblVisitasActivas, "En instalaciones hoy", new Color(56, 189, 248), new Color(59, 130, 246), "👥"));
-        statsPanel.add(crearModernStatCard("Accesos Registrados", lblAccesosHoy, "Eventos de paso", new Color(52, 211, 153), new Color(16, 185, 129), "✓"));
-        statsPanel.add(crearModernStatCard("Alertas de Seguridad", lblAlertas, "Incidentes y bloqueos", new Color(251, 113, 133), new Color(239, 68, 68), "⚠"));
-        statsPanel.add(crearModernStatCard("Personas Registradas", lblPersonasTotal, "Directorio maestro", new Color(192, 132, 252), new Color(147, 51, 234), "📇"));
+        statsPanel.add(crearModernStatCard("Visitas Activas", lblVisitasActivas, "En instalaciones hoy", new Color(56, 189, 248), new Color(59, 130, 246), "VIS"));
+        statsPanel.add(crearModernStatCard("Accesos Registrados", lblAccesosHoy, "Eventos de paso", new Color(52, 211, 153), new Color(16, 185, 129), "OK"));
+        statsPanel.add(crearModernStatCard("Alertas de Seguridad", lblAlertas, "Incidentes y bloqueos", new Color(251, 113, 133), new Color(239, 68, 68), "ALR"));
+        statsPanel.add(crearModernStatCard("Personas Registradas", lblPersonasTotal, "Directorio maestro", new Color(192, 132, 252), new Color(147, 51, 234), "DIR"));
 
         // Tabla de Actividad Reciente de Accesos
         JPanel tableContainer = ThemeConstants.createCard();
@@ -101,18 +101,18 @@ public class DashboardPanel extends JPanel {
         JPanel titleWithBadge = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         titleWithBadge.setOpaque(false);
 
-        JLabel liveDot = new JLabel("●");
+        JLabel liveDot = new JLabel("•");
         liveDot.setFont(new Font("Segoe UI", Font.BOLD, 14));
         liveDot.setForeground(ThemeConstants.ACCENT_CYAN);
 
-        JLabel tableTitle = new JLabel("Monitoreo en Vivo — Últimos Movimientos en Torniquetes y Puntos de Control");
+        JLabel tableTitle = new JLabel("Monitoreo en Vivo — Ultimos Movimientos en Torniquetes y Puntos de Control");
         tableTitle.setFont(ThemeConstants.FONT_SUBTITLE);
         tableTitle.setForeground(ThemeConstants.TEXT_PRIMARY);
 
         titleWithBadge.add(liveDot);
         titleWithBadge.add(tableTitle);
 
-        JButton btnRefrescar = ThemeConstants.createGradientButton("↻  Actualizar", new Color(147, 51, 234), new Color(126, 34, 206), Color.WHITE);
+        JButton btnRefrescar = ThemeConstants.createGradientButton("Actualizar", new Color(147, 51, 234), new Color(126, 34, 206), Color.WHITE);
         btnRefrescar.addActionListener(e -> refrescarDatos());
 
         tableHeaderBar.add(titleWithBadge, BorderLayout.WEST);
@@ -163,13 +163,17 @@ public class DashboardPanel extends JPanel {
                 int w = getWidth();
                 int h = getHeight();
 
-                // Fondo Glassmorphism profundo con leve gradiente
-                GradientPaint gp = new GradientPaint(0, 0, new Color(22, 16, 42), 0, h, new Color(13, 9, 25));
+                boolean light = ThemeConstants.isLightMode;
+
+                // Fondo de tarjeta adaptable (Blanco puro / Glassmorphism oscuro)
+                GradientPaint gp = light
+                        ? new GradientPaint(0, 0, new Color(255, 255, 255), 0, h, new Color(248, 250, 252))
+                        : new GradientPaint(0, 0, new Color(22, 16, 42), 0, h, new Color(13, 9, 25));
                 g2.setPaint(gp);
                 g2.fill(new RoundRectangle2D.Float(0, 0, w, h, 18, 18));
 
                 // Resplandor ambiental respirante en la esquina de la métrica
-                int glowAlpha = (int) (20 + 15 * Math.sin(pulse));
+                int glowAlpha = (int) (light ? (35 + 20 * Math.sin(pulse)) : (20 + 15 * Math.sin(pulse)));
                 g2.setColor(new Color(color1.getRed(), color1.getGreen(), color1.getBlue(), Math.max(5, glowAlpha)));
                 g2.fillOval(w - 90, -30, 120, 120);
 
@@ -181,15 +185,16 @@ public class DashboardPanel extends JPanel {
                 int beamX = (int) (w * (0.5f + 0.4f * Math.sin(pulse)));
                 GradientPaint beam = new GradientPaint(
                         beamX - 30, 0, new Color(255, 255, 255, 0),
-                        beamX, 0, new Color(255, 255, 255, 120),
+                        beamX, 0, new Color(255, 255, 255, light ? 180 : 120),
                         true
                 );
                 g2.setPaint(beam);
                 g2.fillRect(0, 0, w, 4);
 
                 // Borde fino luminoso
-                int borderAlpha = (int) (80 + 40 * Math.sin(pulse));
-                g2.setColor(new Color(147, 51, 234, Math.min(255, borderAlpha)));
+                int borderAlpha = (int) (light ? (140 + 50 * Math.sin(pulse)) : (80 + 40 * Math.sin(pulse)));
+                Color bCol = light ? new Color(196, 181, 253, Math.min(255, borderAlpha)) : new Color(147, 51, 234, Math.min(255, borderAlpha));
+                g2.setColor(bCol);
                 g2.setStroke(new BasicStroke(1.2f));
                 g2.draw(new RoundRectangle2D.Float(0, 0, w - 1, h - 1, 18, 18));
 
@@ -207,7 +212,7 @@ public class DashboardPanel extends JPanel {
 
         JLabel textLabel = new JLabel(label);
         textLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        textLabel.setForeground(ThemeConstants.TEXT_SECONDARY);
+        textLabel.setForeground(ThemeConstants.TEXT_PRIMARY);
 
         // Icon Badge Container con micro-pulsación
         JPanel iconBadge = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 4)) {

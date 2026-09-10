@@ -75,6 +75,22 @@ public class VisitaService implements VisitaUseCase {
             }
         }
 
+        // ============================================================================
+        // PALABRA CLAVE DE BÚSQUEDA EXAMEN: KEY_CONTROL_PLACAS
+        // FUNCIONALIDAD #8: Validación de Placas Duplicadas / Control Vehicular
+        // ============================================================================
+        if (placaVehiculo != null && !placaVehiculo.trim().isEmpty() && !placaVehiculo.equalsIgnoreCase("PEATONAL")) {
+            String placaLimpia = placaVehiculo.trim().toUpperCase();
+            boolean placaDuplicada = visitaRepository.findAll().stream()
+                    .filter(v -> v.getEstado() == com.zonaacme.sica.core.domain.EstadoVisita.EN_CURSO ||
+                                 v.getEstado() == com.zonaacme.sica.core.domain.EstadoVisita.APROBADA)
+                    .anyMatch(v -> placaLimpia.equalsIgnoreCase(v.getPlacaVehiculo()));
+
+            if (placaDuplicada) {
+                throw new DomainRuleException("La placa vehicular '" + placaLimpia + "' ya se encuentra registrada en una visita activa dentro del complejo.");
+            }
+        }
+
         SolicitudVisita visita = SolicitudVisita.crear(
                 visitanteId,
                 anfitrionId,
@@ -95,6 +111,67 @@ public class VisitaService implements VisitaUseCase {
         ));
 
         return visita;
+    }
+
+    /**
+     * ============================================================================
+     * PALABRA CLAVE DE BÚSQUEDA EXAMEN: KEY_CIERRE_JORNADA
+     * FUNCIONALIDAD #7: Cierre Masivo de Visitas por Fin de Jornada
+     * ============================================================================
+     * Finaliza en lote todas las visitas que quedaron abiertas (EN_CURSO) al terminar
+     * la jornada laboral, evitando inconsistencias en auditoría y torniquetes.
+     */
+    public int cerrarVisitasFinJornada(String observaciones) {
+        return cerrarVisitasFinJornada(observaciones, null);
+    }
+
+    public int cerrarVisitasFinJornada(String observaciones, String token) {
+        if (token != null && !token.isBlank()) {
+            authUseCase.validarPermiso(token, "VISITAS_APROBAR", "CIERRE_FIN_JORNADA");
+        }
+
+        List<SolicitudVisita> activas = visitaRepository.findAll().stream()
+                .filter(v -> v.getEstado() == com.zonaacme.sica.core.domain.EstadoVisita.EN_CURSO)
+                .toList();
+
+        for (SolicitudVisita v : activas) {
+            v.registrarSalida();
+            visitaRepository.save(v);
+        }
+
+        System.out.println("[SICA-INFO] Cierre masivo completado. Total visitas finalizadas: " + activas.size());
+        return activas.size();
+    }
+
+    /**
+     * ============================================================================
+     * PALABRA CLAVE DE BÚSQUEDA EXAMEN: KEY_REASIGNAR_ANFITRION
+     * FUNCIONALIDAD #12: Reasignación Dinámica de Anfitrión / Funcionario
+     * ============================================================================
+     * Permite a un supervisor o administrador transferir una solicitud de visita
+     * no contestada a otro funcionario disponible de la empresa.
+     */
+    public void reasignarAnfitrionVisita(String visitaId, String nuevoAnfitrionId, String motivo, String token) {
+        if (token != null && !token.isBlank()) {
+            authUseCase.validarPermiso(token, "VISITAS_REASIGNAR", "REASIGNAR_ANFITRION");
+        }
+
+        SolicitudVisita visita = visitaRepository.findById(visitaId)
+                .orElseThrow(() -> new EntityNotFoundException("SolicitudVisita", visitaId));
+
+        Persona nuevoAnfitrion = personaRepository.findById(nuevoAnfitrionId)
+                .orElseThrow(() -> new EntityNotFoundException("Persona/Anfitrión", nuevoAnfitrionId));
+
+        if (!nuevoAnfitrion.isActivo()) {
+            throw new DomainRuleException("El nuevo anfitrión seleccionado no está activo.");
+        }
+
+        // Reasignar anfitrión modificando la relación
+        visita.setAnfitrionId(nuevoAnfitrionId);
+        visitaRepository.save(visita);
+
+        System.out.println(String.format("[SICA-INFO] Visita '%s' reasignada exitosamente al anfitrión '%s'. Motivo: %s",
+                visitaId, nuevoAnfitrion.getNombreCompleto(), motivo));
     }
 
     @Override
