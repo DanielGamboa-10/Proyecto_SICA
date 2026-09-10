@@ -296,6 +296,15 @@ Estos usuarios son insertados automáticamente por el script `data.sql`:
 - Luis Invitado — Acme Corp — Documento: `11223344`
 - Maria Visitante — Stark Industries — Documento: `44332211`
 
+
+---
+
+**Funcionalidad examen breve explicacion**
+- **Ubicación en código:** `ReportesStreamService.java` y `ReportesPanel.java`.
+- **Ubicación en código:** `ExportadorArchivosService.java` y botones en `ReportesPanel.java`
+-- ¿Como funciona? funciona metiendose al usuario de Funcionario maneja de forma centralizada en el modulo de reportes y consultas para que no depende rigidamente de una sola vista, la informacion esta delimitada para que un funcionario solo asuma el listado asociado a su contexto organizacional mediante la sesion activa
+
+En el programa: Se une al perfil de Funcionario, analitica y reportes, se puede filtrar en algunas opciones para asi listar personas por la empresa donde aparecen los datos solicitados 
 ---
 
 ## 👥 Autores
@@ -304,6 +313,8 @@ Estos usuarios son insertados automáticamente por el script `data.sql`:
 |---|---|---|
 | **Kevin** | `Devkevin` | BD, Empresas, Personas, Incidentes, Auditoría, Reportes, UI, README |
 | **Daniel Gamboa** | `DevGamboa` | Módulo de Usuarios, Control de Acceso, Login RBAC, Concurrencia |
+| **Daniel Gamboa** | `feature-company-dashboard`| Listar Visitas Activas por Empresa, README |
+
 
 ---
 

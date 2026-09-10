@@ -23,8 +23,8 @@ import java.util.List;
 
 /**
  * ============================================================================
- * PALABRA CLAVE DE BÚSQUEDA EXAMEN: KEY_EXPORT_CSV
- * FUNCIONALIDAD #6: Exportación de Bitácora o Personal Presente a TXT / CSV
+ * PALABRA CLAVE KEY_EXPORT_CSV 
+ * Exportación de Bitácora o Personal Presente a TXT / CSV
  * ============================================================================
  * Implementa I/O en Java con BufferedWriter y UTF-8 para exportar datos
  * de emergencia, personal en planta y auditoría externa.
@@ -74,6 +74,8 @@ public class ExportadorArchivosService {
         }
         return activas.size();
     }
+
+
 
     /**
      * KEY_EXPORT_CSV: Exporta la planilla de evacuación / personal en sitio en formato TXT.
@@ -155,4 +157,6 @@ public class ExportadorArchivosService {
         }
         return registros.size();
     }
+
+
 }

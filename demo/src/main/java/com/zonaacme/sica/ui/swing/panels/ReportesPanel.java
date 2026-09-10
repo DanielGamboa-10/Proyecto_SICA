@@ -213,7 +213,7 @@ public class ReportesPanel extends JPanel {
         return card;
     }
 
-    // KEY_STREAM_REPORTES: Generación centralizada de analítica mediante Java Streams
+    // : Generación centralizada de analítica mediante Java Streams
     public void generarReporteSeleccionado() {
         List<Persona> personas = personaRepository.findAll();
         List<Zona> zonas = zonaRepository.findAllZonas();
