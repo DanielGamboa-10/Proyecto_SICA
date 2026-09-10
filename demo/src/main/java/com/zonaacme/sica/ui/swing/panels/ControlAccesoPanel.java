@@ -2,9 +2,9 @@ package com.zonaacme.sica.ui.swing.panels;
 
 import com.zonaacme.sica.auth.domain.SesionUsuario;
 import com.zonaacme.sica.core.adapters.ControlAccesoService;
-import com.zonaacme.sica.core.adapters.InMemoryPersonaRepositoryAdapter;
-import com.zonaacme.sica.core.adapters.InMemoryZonaRepositoryAdapter;
 import com.zonaacme.sica.core.domain.*;
+import com.zonaacme.sica.core.ports.out.PersonaRepositoryPort;
+import com.zonaacme.sica.core.ports.out.ZonaRepositoryPort;
 import com.zonaacme.sica.ui.swing.ThemeConstants;
 
 import javax.swing.*;
@@ -18,8 +18,8 @@ import java.util.Optional;
 public class ControlAccesoPanel extends JPanel {
 
     private final ControlAccesoService controlAccesoService;
-    private final InMemoryPersonaRepositoryAdapter personaRepo;
-    private final InMemoryZonaRepositoryAdapter zonaRepo;
+    private final PersonaRepositoryPort personaRepo;
+    private final ZonaRepositoryPort zonaRepo;
     private SesionUsuario sesionActual;
 
     private JComboBox<String> comboTipoDoc;
@@ -37,8 +37,8 @@ public class ControlAccesoPanel extends JPanel {
 
     public ControlAccesoPanel(
             ControlAccesoService controlAccesoService,
-            InMemoryPersonaRepositoryAdapter personaRepo,
-            InMemoryZonaRepositoryAdapter zonaRepo,
+            PersonaRepositoryPort personaRepo,
+            ZonaRepositoryPort zonaRepo,
             SesionUsuario sesionActual
     ) {
         this.controlAccesoService = controlAccesoService;

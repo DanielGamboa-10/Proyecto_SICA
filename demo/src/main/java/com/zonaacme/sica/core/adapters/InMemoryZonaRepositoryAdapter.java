@@ -78,7 +78,9 @@ public class InMemoryZonaRepositoryAdapter implements ZonaRepositoryPort {
     @Override
     public Optional<Zona> findZonaByCodigo(String codigo) {
         if (codigo == null) return Optional.empty();
-        String id = idPorCodigoZona.get(codigo.trim().toUpperCase());
+        String cod = codigo.trim().toUpperCase();
+        if ("ZONA_RECEPCION".equals(cod)) cod = "ZONA_LOBBY";
+        String id = idPorCodigoZona.get(cod);
         if (id == null) return Optional.empty();
         return Optional.ofNullable(zonasPorId.get(id));
     }
@@ -104,7 +106,10 @@ public class InMemoryZonaRepositoryAdapter implements ZonaRepositoryPort {
     @Override
     public Optional<PuntoControl> findPuntoControlByCodigo(String codigo) {
         if (codigo == null) return Optional.empty();
-        String id = idPorCodigoPunto.get(codigo.trim().toUpperCase());
+        String cod = codigo.trim().toUpperCase();
+        if ("PC_PUERTA_DC".equals(cod)) cod = "PC_DC_RESTRINGIDO";
+        if ("PC_TORNIQUETE_01".equals(cod)) cod = "PC_TORN_01";
+        String id = idPorCodigoPunto.get(cod);
         if (id == null) return Optional.empty();
         return Optional.ofNullable(puntosPorId.get(id));
     }

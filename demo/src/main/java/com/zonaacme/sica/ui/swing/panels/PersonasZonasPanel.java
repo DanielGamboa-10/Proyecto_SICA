@@ -1,11 +1,13 @@
 package com.zonaacme.sica.ui.swing.panels;
 
-import com.zonaacme.sica.core.adapters.InMemoryPersonaRepositoryAdapter;
-import com.zonaacme.sica.core.adapters.InMemoryZonaRepositoryAdapter;
+import com.zonaacme.sica.auth.domain.Rol;
+import com.zonaacme.sica.auth.domain.SesionUsuario;
 import com.zonaacme.sica.core.domain.Persona;
 import com.zonaacme.sica.core.domain.PuntoControl;
 import com.zonaacme.sica.core.domain.TipoPersona;
 import com.zonaacme.sica.core.domain.Zona;
+import com.zonaacme.sica.core.ports.out.PersonaRepositoryPort;
+import com.zonaacme.sica.core.ports.out.ZonaRepositoryPort;
 import com.zonaacme.sica.ui.swing.ThemeConstants;
 
 import javax.swing.*;
@@ -16,8 +18,9 @@ import java.util.List;
 
 public class PersonasZonasPanel extends JPanel {
 
-    private final InMemoryPersonaRepositoryAdapter personaRepo;
-    private final InMemoryZonaRepositoryAdapter zonaRepo;
+    private final PersonaRepositoryPort personaRepo;
+    private final ZonaRepositoryPort zonaRepo;
+    private SesionUsuario sesionActual;
 
     private DefaultTableModel personasTableModel;
     private JTable personasTable;
@@ -30,20 +33,42 @@ public class PersonasZonasPanel extends JPanel {
     private JButton btnTabPersonas;
     private JButton btnTabZonas;
 
+    private JButton btnNuevaPersona;
+    private JButton btnHabilitar;
+    private JButton btnBloquear;
+
     public PersonasZonasPanel(
-            InMemoryPersonaRepositoryAdapter personaRepo,
-            InMemoryZonaRepositoryAdapter zonaRepo
+            PersonaRepositoryPort personaRepo,
+            ZonaRepositoryPort zonaRepo,
+            SesionUsuario sesionActual
     ) {
         this.personaRepo = personaRepo;
         this.zonaRepo = zonaRepo;
+        this.sesionActual = sesionActual;
 
         setLayout(new BorderLayout(20, 20));
         setBackground(ThemeConstants.BG_DARK);
         setBorder(new EmptyBorder(24, 28, 24, 28));
 
         initUI();
+        aplicarPermisosRBAC();
         cargarPersonas();
         cargarZonas();
+    }
+
+    public void setSesionActual(SesionUsuario sesionActual) {
+        this.sesionActual = sesionActual;
+        aplicarPermisosRBAC();
+    }
+
+    private void aplicarPermisosRBAC() {
+        if (sesionActual == null) return;
+        Rol rol = sesionActual.getRol();
+
+        boolean esAdminOSuper = (rol == Rol.ADMINISTRADOR || rol == Rol.AUDITOR);
+        if (btnNuevaPersona != null) btnNuevaPersona.setEnabled(rol.tienePermiso("USUARIOS_GESTIONAR") || esAdminOSuper);
+        if (btnHabilitar != null) btnHabilitar.setEnabled(esAdminOSuper);
+        if (btnBloquear != null) btnBloquear.setEnabled(esAdminOSuper);
     }
 
     private void initUI() {
@@ -68,13 +93,13 @@ public class PersonasZonasPanel extends JPanel {
         tabSwitcher.setBorder(new EmptyBorder(0, 0, 8, 0));
 
         btnTabPersonas = ThemeConstants.createGradientButton(
-                "👤 Directorio de Personas",
+                "Directorio de Personas",
                 ThemeConstants.ACCENT_PRIMARY,
                 ThemeConstants.ACCENT_CYAN,
                 Color.WHITE
         );
         btnTabZonas = ThemeConstants.createButton(
-                "🏢 Zonas y Puntos de Control",
+                "Zonas y Puntos de Control",
                 ThemeConstants.BG_CARD,
                 ThemeConstants.TEXT_SECONDARY
         );
@@ -111,13 +136,13 @@ public class PersonasZonasPanel extends JPanel {
         JPanel toolbarPersonas = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         toolbarPersonas.setOpaque(false);
 
-        JButton btnNuevaPersona = ThemeConstants.createButton("Registrar Persona", ThemeConstants.ACCENT_PRIMARY, Color.WHITE);
+        btnNuevaPersona = ThemeConstants.createButton("Registrar Persona", ThemeConstants.ACCENT_PRIMARY, Color.WHITE);
         btnNuevaPersona.addActionListener(e -> mostrarModalNuevaPersona());
 
-        JButton btnHabilitar = ThemeConstants.createButton("Habilitar Acceso", ThemeConstants.ACCENT_SUCCESS, Color.WHITE);
+        btnHabilitar = ThemeConstants.createButton("Habilitar Acceso", ThemeConstants.ACCENT_SUCCESS, Color.WHITE);
         btnHabilitar.addActionListener(e -> alternarEstadoPersona(true));
 
-        JButton btnBloquear = ThemeConstants.createButton("Bloquear Acceso", ThemeConstants.ACCENT_DANGER, Color.WHITE);
+        btnBloquear = ThemeConstants.createButton("Bloquear Acceso", ThemeConstants.ACCENT_DANGER, Color.WHITE);
         btnBloquear.addActionListener(e -> alternarEstadoPersona(false));
 
         toolbarPersonas.add(btnNuevaPersona);
@@ -134,9 +159,7 @@ public class PersonasZonasPanel extends JPanel {
         personasTable = new JTable(personasTableModel);
         ThemeConstants.styleTable(personasTable);
 
-        JScrollPane scrollPersonas = new JScrollPane(personasTable);
-        scrollPersonas.getViewport().setBackground(ThemeConstants.BG_CARD);
-        scrollPersonas.setBorder(BorderFactory.createEmptyBorder());
+        JScrollPane scrollPersonas = ThemeConstants.createScrollPane(personasTable);
 
         JPanel cardPersonasTable = ThemeConstants.createCard();
         cardPersonasTable.setLayout(new BorderLayout(0, 12));
@@ -158,9 +181,7 @@ public class PersonasZonasPanel extends JPanel {
         zonasTable = new JTable(zonasTableModel);
         ThemeConstants.styleTable(zonasTable);
 
-        JScrollPane scrollZonas = new JScrollPane(zonasTable);
-        scrollZonas.getViewport().setBackground(ThemeConstants.BG_CARD);
-        scrollZonas.setBorder(BorderFactory.createEmptyBorder());
+        JScrollPane scrollZonas = ThemeConstants.createScrollPane(zonasTable);
 
         JPanel cardZonasTable = ThemeConstants.createCard();
         cardZonasTable.setLayout(new BorderLayout(0, 12));
@@ -221,6 +242,11 @@ public class PersonasZonasPanel extends JPanel {
     }
 
     private void alternarEstadoPersona(boolean activar) {
+        if (sesionActual != null && sesionActual.getRol() != Rol.ADMINISTRADOR && sesionActual.getRol() != Rol.AUDITOR) {
+            JOptionPane.showMessageDialog(this, "Acceso denegado: Solo administradores o supervisores de seguridad pueden cambiar el estado de personas.", "RBAC", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         int row = personasTable.getSelectedRow();
         if (row < 0) {
             JOptionPane.showMessageDialog(this, "Seleccione una persona de la tabla", "Aviso", JOptionPane.WARNING_MESSAGE);
@@ -236,12 +262,17 @@ public class PersonasZonasPanel extends JPanel {
                 p.desactivar();
             }
             personaRepo.save(p);
-            JOptionPane.showMessageDialog(this, "Estado actualizado para: " + p.getNombreCompleto(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Estado actualizado en base de datos para: " + p.getNombreCompleto(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
             cargarPersonas();
         }
     }
 
     private void mostrarModalNuevaPersona() {
+        if (sesionActual != null && sesionActual.getRol() != Rol.ADMINISTRADOR && sesionActual.getRol() != Rol.AUDITOR) {
+            JOptionPane.showMessageDialog(this, "Acceso denegado: No tiene permisos para registrar nuevas personas.", "RBAC", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Registrar Nueva Persona", true);
         dialog.setLayout(new BorderLayout(16, 16));
         dialog.getContentPane().setBackground(ThemeConstants.BG_DARK);
@@ -295,7 +326,7 @@ public class PersonasZonasPanel extends JPanel {
                         (TipoPersona) comboTipo.getSelectedItem()
                 );
                 personaRepo.save(nueva);
-                JOptionPane.showMessageDialog(dialog, "Persona registrada con éxito", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, "Persona registrada exitosamente en MySQL", "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 dialog.dispose();
                 cargarPersonas();
             } catch (Exception ex) {

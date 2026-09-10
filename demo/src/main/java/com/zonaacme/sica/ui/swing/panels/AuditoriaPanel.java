@@ -1,8 +1,7 @@
 package com.zonaacme.sica.ui.swing.panels;
 
-import com.zonaacme.sica.audit.adapters.AuditService;
-import com.zonaacme.sica.audit.adapters.InMemoryAuditRepositoryAdapter;
 import com.zonaacme.sica.audit.domain.BitacoraAuditoria;
+import com.zonaacme.sica.audit.ports.out.AuditRepositoryPort;
 import com.zonaacme.sica.ui.swing.ThemeConstants;
 
 import javax.swing.*;
@@ -14,13 +13,13 @@ import java.util.List;
 
 public class AuditoriaPanel extends JPanel {
 
-    private final InMemoryAuditRepositoryAdapter auditRepo;
+    private final AuditRepositoryPort auditRepo;
     private DefaultTableModel tableModel;
     private JTextField txtBuscar;
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public AuditoriaPanel(InMemoryAuditRepositoryAdapter auditRepo) {
+    public AuditoriaPanel(AuditRepositoryPort auditRepo) {
         this.auditRepo = auditRepo;
 
         setLayout(new BorderLayout(20, 20));
@@ -88,9 +87,7 @@ public class AuditoriaPanel extends JPanel {
         JTable table = new JTable(tableModel);
         ThemeConstants.styleTable(table);
 
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.getViewport().setBackground(ThemeConstants.BG_CARD);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        JScrollPane scrollPane = ThemeConstants.createScrollPane(table);
         tableContainer.add(scrollPane, BorderLayout.CENTER);
 
         add(topPanel, BorderLayout.NORTH);

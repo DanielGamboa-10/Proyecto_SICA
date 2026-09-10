@@ -1,6 +1,4 @@
-USE sica_db;
-
--- 1. ROLES
+-- 1. ROLES (Compatible con BD 'campus' y 'sica_db')
 INSERT INTO roles (id, nombre_rol) VALUES 
 (1, 'Superusuario'),
 (2, 'Supervisor de Seguridad'),

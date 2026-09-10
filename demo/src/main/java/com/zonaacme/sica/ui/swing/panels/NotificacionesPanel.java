@@ -1,10 +1,10 @@
 package com.zonaacme.sica.ui.swing.panels;
 
-import com.zonaacme.sica.notifications.adapters.InMemoryNotificationRepositoryAdapter;
 import com.zonaacme.sica.notifications.adapters.NotificationService;
 import com.zonaacme.sica.notifications.domain.CanalNotificacion;
 import com.zonaacme.sica.notifications.domain.Notificacion;
 import com.zonaacme.sica.notifications.domain.TipoNotificacion;
+import com.zonaacme.sica.notifications.ports.out.NotificationRepositoryPort;
 import com.zonaacme.sica.ui.swing.ThemeConstants;
 
 import javax.swing.*;
@@ -17,13 +17,13 @@ import java.util.List;
 public class NotificacionesPanel extends JPanel {
 
     private final NotificationService notificationService;
-    private final InMemoryNotificationRepositoryAdapter notificationRepo;
+    private final NotificationRepositoryPort notificationRepo;
     private DefaultTableModel tableModel;
     private JTable notificacionesTable;
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public NotificacionesPanel(NotificationService notificationService, InMemoryNotificationRepositoryAdapter notificationRepo) {
+    public NotificacionesPanel(NotificationService notificationService, NotificationRepositoryPort notificationRepo) {
         this.notificationService = notificationService;
         this.notificationRepo = notificationRepo;
 
@@ -33,6 +33,16 @@ public class NotificacionesPanel extends JPanel {
 
         initUI();
         cargarNotificaciones();
+        iniciarAutoRefresh();
+    }
+
+    private void iniciarAutoRefresh() {
+        Timer timer = new Timer(2500, e -> {
+            if (isShowing()) {
+                cargarNotificaciones();
+            }
+        });
+        timer.start();
     }
 
     private void initUI() {
@@ -88,9 +98,7 @@ public class NotificacionesPanel extends JPanel {
         notificacionesTable = new JTable(tableModel);
         ThemeConstants.styleTable(notificacionesTable);
 
-        JScrollPane scrollPane = new JScrollPane(notificacionesTable);
-        scrollPane.getViewport().setBackground(ThemeConstants.BG_CARD);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        JScrollPane scrollPane = ThemeConstants.createScrollPane(notificacionesTable);
         tableContainer.add(scrollPane, BorderLayout.CENTER);
 
         add(topPanel, BorderLayout.NORTH);

@@ -1,6 +1,5 @@
-DROP DATABASE IF EXISTS sica_db;
-CREATE DATABASE sica_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE sica_db;
+CREATE DATABASE IF NOT EXISTS campus CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS sica_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- =========== 1. SEGURIDAD Y CONTROL DE ACCESO (RBAC) ===========
 CREATE TABLE roles (
