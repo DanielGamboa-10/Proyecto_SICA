@@ -308,3 +308,8 @@ Estos usuarios son insertados automáticamente por el script `data.sql`:
 ---
 
 > 📅 Proyecto desarrollado como entrega académica | 2026
+
+## kevin examen 
+reportes Agregados con Stream API (Top Visitantes / Horas Pico)
+entras a la carpeta, ReportesStreamService.java
+ahi esta la parte de los reportes por horas.

@@ -1,18 +1,24 @@
 package com.zonaacme.sica.core.services;
 
-import com.zonaacme.sica.core.domain.*;
-import com.zonaacme.sica.core.ports.out.*;
-
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import com.zonaacme.sica.core.domain.EstadoVisita;
+import com.zonaacme.sica.core.domain.RegistroAcceso;
+import com.zonaacme.sica.core.domain.ResultadoAcceso;
+import com.zonaacme.sica.core.domain.SolicitudVisita;
+import com.zonaacme.sica.core.domain.Zona;
+import com.zonaacme.sica.core.ports.out.PersonaRepositoryPort;
+import com.zonaacme.sica.core.ports.out.RegistroAccesoRepositoryPort;
+import com.zonaacme.sica.core.ports.out.VisitaRepositoryPort;
+import com.zonaacme.sica.core.ports.out.ZonaRepositoryPort;
+
 /**
- * ============================================================================
- * PALABRA CLAVE DE BÚSQUEDA EXAMEN: KEY_STREAM_REPORTES
- * FUNCIONALIDAD #4: Reportes Agregados con Stream API (Top Visitantes / Horas Pico)
- * ============================================================================
- * Utiliza Stream API avanzado de Java (Collectors.groupingBy, counting, mapping,
- * sorted, filtering) para generar analítica de seguridad en tiempo real.
+  Reportes Agregados con Stream API (Top Visitantes / Horas Pico)
+ * Utiliza Stream API avanzado de Java e seguridad en tiempo real.
  */
 public class ReportesStreamService {
 
@@ -33,9 +39,7 @@ public class ReportesStreamService {
         this.zonaRepo = zonaRepo;
     }
 
-    /**
-     * KEY_STREAM_REPORTES: Top N personas con mayor cantidad de accesos registrados.
-     * Utiliza: Stream -> groupingBy(PersonaId, counting()) -> sorted por frecuencia descendente.
+    /** sorted por frecuencia descendente.
      */
     public List<Map.Entry<String, Long>> obtenerTopPersonasConMasAccesos(int topN) {
         List<RegistroAcceso> accesos = registroAccesoRepo.findAll();
@@ -49,7 +53,7 @@ public class ReportesStreamService {
     }
 
     /**
-     * KEY_STREAM_REPORTES: Top N visitantes más frecuentes a partir de solicitudes de visita.
+     * STREAM_REPORTES: Top N visitantes más frecuentes a partir de solicitudes de visita.
      */
     public static Map<String, Long> calcularTopVisitantes(List<SolicitudVisita> visitas, int limit) {
         return visitas.stream()
@@ -66,8 +70,8 @@ public class ReportesStreamService {
     }
 
     /**
-     * KEY_STREAM_REPORTES: Horas pico de accesos (agrupación de accesos por hora del día 0 a 23).
-     * Utiliza: Stream -> groupingBy(Hora, counting()) -> orden cronológico.
+     * STREAM_REPORTES: Horas pico de accesos
+     * Utiliza: Streamorden cronológico.
      */
     public static Map<Integer, Long> calcularAccesosPorHora(List<RegistroAcceso> accesos) {
         return accesos.stream()
@@ -83,8 +87,8 @@ public class ReportesStreamService {
     }
 
     /**
-     * KEY_STREAM_REPORTES: Distribución porcentual y conteo por Resultado de Acceso (PERMITIDO vs DENEGADO).
-     * Utiliza: Stream -> groupingBy(ResultadoAcceso, counting()).
+     * STREAM_REPORTES: Distribución porcentual y conteo por Resultado de Acceso 
+     * Utiliza: Stream 
      */
     public Map<ResultadoAcceso, Long> obtenerDistribucionResultadosAcceso() {
         return registroAccesoRepo.findAll().stream()
@@ -92,7 +96,7 @@ public class ReportesStreamService {
     }
 
     /**
-     * KEY_STREAM_REPORTES: Distribución de visitas por Estado (PENDIENTE, APROBADA, EN_CURSO, COMPLETADA, RECHAZADA).
+     * STREAM_REPORTES: Distribución de visitas por Estado
      */
     public Map<EstadoVisita, Long> obtenerDistribucionEstadosVisitas() {
         return visitaRepo.findAll().stream()
@@ -100,7 +104,7 @@ public class ReportesStreamService {
     }
 
     /**
-     * KEY_STREAM_REPORTES: Ocupación actual de visitas activas agrupadas por Zona autorizada.
+     * STREAM_REPORTES: Ocupación actual de visitas activas agrupadas por Zona autorizada.
      */
     public Map<String, Long> obtenerOcupacionVisitasPorZona() {
         return visitaRepo.findAll().stream()
